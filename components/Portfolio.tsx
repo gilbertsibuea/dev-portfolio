@@ -170,6 +170,8 @@ const CategoryFilter: React.FC<{
     <motion.div 
         className="p-3 md:p-4 rounded-xl bg-gray-700/60 mb-4 md:mb-6"
         variants={fadeInUp}
+        initial="hidden"
+        animate="visible"
     >
         <div className="flex flex-wrap justify-center gap-2 md:gap-3">
             {categories.map((category) => (
@@ -210,7 +212,7 @@ const ProjectDisplay: React.FC<{
     getValidImageSrc: (project: Project) => string
     isMobile: boolean
 }> = ({ project, showDetails, onToggleDetails, onMaximize, getValidImageSrc, isMobile }) => (
-    <div className={`bg-gray-700/60 rounded-xl overflow-hidden relative ${isMobile ? 'h-[60vh]' : 'h-[500px]'}`}>
+    <div className={`bg-gray-700/60 rounded-xl overflow-hidden relative ${isMobile ? 'h-[55vh]' : 'h-[500px]'}`}>
         {/* Control Buttons */}
         <div className="absolute top-2 md:top-4 right-2 md:right-4 z-20 flex gap-2">
             <button
@@ -660,7 +662,7 @@ export const Portfolio = () => {
 
     return (
         <section 
-            className="min-h-screen py-8 md:py-16 relative overflow-hidden text-white" 
+            className="min-h-screen py-8 md:py-16 relative overflow-visible md:overflow-hidden text-white" 
             style={{ background: THEME.colors.primary }} 
             id="portfolio"
         >
@@ -723,12 +725,23 @@ export const Portfolio = () => {
                         initial="hidden"
                         animate="visible"
                     >
-                        <CategoryFilter 
-                            isMobile={isMobile}
-                            categories={availableCategories}
-                            selectedCategory={selectedCategory}
-                            onSelect={cat => setSelectedCategory(cat)}
-                        />
+                        {isMobile ? (
+                            <div className="sticky top-24 z-20 bg-gray-700/60 backdrop-blur-md rounded-xl px-2 py-2 border border-white/5">
+                                <CategoryFilter 
+                                    isMobile={isMobile}
+                                    categories={availableCategories}
+                                    selectedCategory={selectedCategory}
+                                    onSelect={cat => setSelectedCategory(cat)}
+                                />
+                            </div>
+                        ) : (
+                            <CategoryFilter 
+                                isMobile={isMobile}
+                                categories={availableCategories}
+                                selectedCategory={selectedCategory}
+                                onSelect={cat => setSelectedCategory(cat)}
+                            />
+                        )}
                         
                         {selectedProject ? (
                             <ProjectDisplay
@@ -749,7 +762,7 @@ export const Portfolio = () => {
 
                 {/* CTA */}
                 <motion.div 
-                    className="text-center pt-8 md:pt-2"
+                    className="text-center pt-12 md:pt-2 pb-8 md:pb-0 relative z-10"
                     variants={fadeInUp}
                     initial="hidden"
                     animate="visible"

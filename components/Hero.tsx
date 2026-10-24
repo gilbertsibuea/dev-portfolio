@@ -153,19 +153,13 @@ export const Hero = () => {
                 initial="hidden"
                 animate="visible"
             >
-                <motion.span 
-                    variants={itemVariants}
-                    className="mb-7 inline-block rounded-full bg-gray-600/50 px-3 py-1.5 text-sm"
-                >
-                    Open for work
-                </motion.span>
-                
+               
                 {/* LCP elements: render immediately visible, no animation delay */}
-                <h1 className="text-white/40 text-4xl sm:text-5xl md:text-7xl font-black text-center">
+                <h1 className="text-white/40 text-5xl sm:text-6xl md:text-7xl font-black text-center">
                     Hi, I am
                 </h1>
                 
-                <h1 className="w-full max-w-3xl bg-gradient-to-br from-white to-gray-400 bg-clip-text font-black leading-tight text-transparent text-4xl sm:text-5xl md:text-7xl text-center">
+                <h1 className="w-full max-w-3xl bg-gradient-to-br from-white to-gray-400 bg-clip-text font-black leading-tight text-transparent text-5xl sm:text-6xl md:text-7xl text-center">
                     Gilbert Hasiholan Sibuea
                 </h1>
 
@@ -173,7 +167,7 @@ export const Hero = () => {
                     variants={itemVariants}
                     className="my-6 max-w-xl text-center"
                 > 
-                    Fullstack Developer based in Bandar Lampung with over 2 years of experience, 
+                    Fullstack Developer based in Bandung with over 2 years of experience, 
                     specializing in building end-to-end web applications.
                 </motion.p>
 

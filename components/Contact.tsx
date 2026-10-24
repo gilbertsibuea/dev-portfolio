@@ -46,8 +46,8 @@ export const Contact = () => {
                             <a href="mailto:devgilberths@gmail.com" 
                                className="text-xl sm:text-2xl font-semibold hover:text-gray-400 transition duration-300 flex items-center justify-center gap-3"
                             >
-                                <MdEmail className="text-red-400 text-2xl sm:text-3xl" />
-                                dev@gilbertsibuea.com
+                                <MdEmail className="text-red-400 text-2xl sm:text-xl" />
+                                gilbertsibuea8539@gmail.com
                             </a>
                         </div>
                         
