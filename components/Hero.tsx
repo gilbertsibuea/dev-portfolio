@@ -1,13 +1,113 @@
 "use client"
 
-import { useEffect, useRef } from "react"
-import { motion } from "framer-motion"
-import { FiArrowRight, FiMail } from "react-icons/fi"
+import { useEffect, useRef, useState } from "react"
+import { AnimatePresence, motion } from "framer-motion"
+import { FiArrowRight, FiMail, FiRefreshCw } from "react-icons/fi"
 import { usePreloader } from "./PreloaderContext"
+
+type FloatingDraggableTextProps = {
+    text: string
+    className?: string
+    letterClassName?: string
+    resetKey?: number
+    onLetterMoved?: () => void
+}
+
+/** Each letter floats gently and can be dragged. Words stay intact (no mid-word wrap). */
+function FloatingDraggableText({
+    text,
+    className = "",
+    letterClassName = "",
+    resetKey = 0,
+    onLetterMoved,
+}: FloatingDraggableTextProps) {
+    const words = text.split(" ")
+    let letterIndex = 0
+
+    return (
+        <motion.h1
+            variants={{
+                hidden: { opacity: 0, y: 48, scale: 0.94 },
+                visible: {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    transition: {
+                        duration: 0.8,
+                        ease: [0.25, 0.46, 0.45, 0.94],
+                    },
+                },
+            }}
+            className={`flex flex-wrap justify-center items-baseline gap-x-[0.28em] gap-y-1 ${className}`}
+            aria-label={text}
+        >
+            {words.map((word, wordIndex) => (
+                <span
+                    key={`${word}-${wordIndex}-${resetKey}`}
+                    className="inline-flex whitespace-nowrap items-baseline"
+                >
+                    {word.split("").map((char) => {
+                        const index = letterIndex++
+                        // Soft, slow drift — mostly vertical, tiny horizontal
+                        const floatDuration = 5.5 + (index % 4) * 0.6
+                        const floatDelay = (index % 6) * 0.2
+
+                        return (
+                            <motion.span
+                                key={`${word}-${index}-${char}-${resetKey}`}
+                                drag
+                                dragMomentum={false}
+                                dragElastic={0.12}
+                                onDragStart={() => onLetterMoved?.()}
+                                whileDrag={{
+                                    scale: 1.15,
+                                    zIndex: 60,
+                                    cursor: "grabbing",
+                                    filter: "drop-shadow(0 0 10px rgba(172, 158, 227, 0.5))",
+                                }}
+                                whileHover={{ scale: 1.05 }}
+                                className="relative inline-block cursor-grab active:cursor-grabbing touch-none select-none leading-none"
+                                style={{ zIndex: 10 }}
+                            >
+                                <motion.span
+                                    className={`inline-block will-change-transform ${letterClassName}`}
+                                    animate={{
+                                        y: [0, -3, -1.5, -3.5, 0],
+                                        x: [0, 0.8, 0, -0.8, 0],
+                                        rotate: [0, 0.4, 0, -0.4, 0],
+                                    }}
+                                    transition={{
+                                        duration: floatDuration,
+                                        repeat: Infinity,
+                                        ease: "easeInOut",
+                                        delay: floatDelay,
+                                    }}
+                                >
+                                    {char}
+                                </motion.span>
+                            </motion.span>
+                        )
+                    })}
+                </span>
+            ))}
+        </motion.h1>
+    )
+}
 
 export const Hero = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const { isComplete: isPreloaderComplete } = usePreloader()
+    const [lettersMoved, setLettersMoved] = useState(false)
+    const [resetKey, setResetKey] = useState(0)
+
+    const handleLetterMoved = () => {
+        if (!lettersMoved) setLettersMoved(true)
+    }
+
+    const handleResetLetters = () => {
+        setResetKey((key) => key + 1)
+        setLettersMoved(false)
+    }
 
     useEffect(() => {
         const canvas = canvasRef.current
@@ -133,19 +233,6 @@ export const Hero = () => {
         },
     }
 
-    const titleVariants = {
-        hidden: { opacity: 0, y: 48, scale: 0.94 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            transition: {
-                duration: 0.8,
-                ease: easeOut,
-            },
-        },
-    }
-
     const socialContainerVariants = {
         hidden: { opacity: 0, y: 40 },
         visible: {
@@ -174,7 +261,7 @@ export const Hero = () => {
     }
 
     return(
-        <section id="hero" className="relative grid min-h-screen place-content-center overflow-hidden px-4 py-24 text-gray-200">
+        <section id="hero" className="relative grid min-h-screen place-content-center overflow-visible px-4 py-24 text-gray-200">
             {/* Lightweight canvas background */}
             <canvas 
                 ref={canvasRef}
@@ -196,19 +283,45 @@ export const Hero = () => {
                 initial="hidden"
                 animate={isPreloaderComplete ? "visible" : "hidden"}
             >
-                <motion.h1
-                    variants={titleVariants}
-                    className="text-white/40 text-5xl sm:text-6xl md:text-7xl font-black text-center"
-                >
-                    Hi, I am
-                </motion.h1>
-                
-                <motion.h1
-                    variants={titleVariants}
-                    className="w-full max-w-3xl bg-gradient-to-br from-white to-gray-400 bg-clip-text font-black leading-tight text-transparent text-5xl sm:text-6xl md:text-7xl text-center"
-                >
-                    Gilbert Hasiholan Sibuea
-                </motion.h1>
+                <div className="relative w-full flex flex-col items-center">
+                    <div className="h-10 mb-2 flex items-center justify-center">
+                        <AnimatePresence>
+                            {lettersMoved && (
+                                <motion.button
+                                    type="button"
+                                    onClick={handleResetLetters}
+                                    initial={{ opacity: 0, y: 8, scale: 0.9 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 4, scale: 0.9 }}
+                                    transition={{ duration: 0.25 }}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.96 }}
+                                    className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-gray-200 backdrop-blur-md shadow-lg hover:bg-white/15 hover:border-white/30 transition-colors"
+                                    aria-label="Reset letter positions"
+                                >
+                                    <FiRefreshCw className="text-base" />
+                                    Reset
+                                </motion.button>
+                            )}
+                        </AnimatePresence>
+                    </div>
+
+                    <FloatingDraggableText
+                        text="Hi, I am"
+                        resetKey={resetKey}
+                        onLetterMoved={handleLetterMoved}
+                        className="text-5xl sm:text-6xl md:text-7xl font-black text-center"
+                        letterClassName="text-white/40"
+                    />
+
+                    <FloatingDraggableText
+                        text="Gilbert Hasiholan Sibuea"
+                        resetKey={resetKey}
+                        onLetterMoved={handleLetterMoved}
+                        className="w-full max-w-3xl font-black leading-tight text-5xl sm:text-6xl md:text-7xl text-center"
+                        letterClassName="bg-gradient-to-br from-white to-gray-400 bg-clip-text text-transparent"
+                    />
+                </div>
 
                 <motion.p 
                     variants={itemVariants}
