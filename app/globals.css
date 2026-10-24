@@ -111,3 +111,38 @@ section {
  background: #1F1F1F;
 }
 
+/* ===========================
+   Scrollbars
+   =========================== */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-modern {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(167, 139, 250, 0.45) transparent;
+}
+
+.scrollbar-modern::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-modern::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-modern::-webkit-scrollbar-thumb {
+  background: rgba(167, 139, 250, 0.4);
+  border-radius: 999px;
+}
+
+.scrollbar-modern::-webkit-scrollbar-thumb:hover {
+  background: rgba(167, 139, 250, 0.7);
+}
+
