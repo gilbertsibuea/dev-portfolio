@@ -11,7 +11,7 @@ import { FaPython } from "react-icons/fa";
 import { FaFlutter } from "react-icons/fa6";
 import { FaJava } from "react-icons/fa";
 import { FaPhp } from 'react-icons/fa';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { FaDocker } from "react-icons/fa";
 import { SiTailwindcss } from "react-icons/si";
 import { FaGitAlt } from "react-icons/fa";
@@ -73,7 +73,9 @@ export const Stack = () => {
     const [totalHits, setTotalHits] = useState(0);
     const [isClient, setIsClient] = useState(false);
     const gameRef = useRef<HTMLDivElement>(null);
+    const sectionRef = useRef<HTMLElement>(null);
     const animationRef = useRef<number | undefined>(undefined);
+    const sectionInView = useInView(sectionRef, { once: true, amount: 0.2, margin: "-80px 0px" });
 
     // Fix hydration issue by only rendering random particles on client
     useEffect(() => {
@@ -382,11 +384,12 @@ export const Stack = () => {
 
     return (
          <section 
+            ref={sectionRef}
             className='glass py-16 bg-gradient-to-br from-slate-900/50 via-purple-900/20 to-slate-900/50 backdrop-blur-sm relative overflow-hidden rounded-t-2xl' 
             id='stack'
          >
-            {/* Fixed background particles - only render on client */}
-            {isClient && (
+            {/* Fixed background particles - only when section is in view */}
+            {isClient && sectionInView && (
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     {backgroundParticles.map((particle) => (
                         <motion.div
@@ -414,9 +417,9 @@ export const Stack = () => {
             <div className='max-w-[1200px] mx-auto px-4 text-center relative z-10'>
                 <motion.h2 
                     className={`${isMobile ? 'text-3xl' : 'text-5xl'} text-center text-gray-200 font-bold tracking-tight mb-8`}
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
+                    initial={{ opacity: 0, y: 28 }}
+                    animate={sectionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
+                    transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
                 >
                     My Tech Stack
                     {gameMode && (
@@ -520,9 +523,9 @@ export const Stack = () => {
                     <>
                         <motion.div 
                             className="mb-8"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={sectionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+                            transition={{ delay: 0.12, duration: 0.45 }}
                         >
                             <p className={`text-gray-400 ${isMobile ? 'text-sm' : 'text-base'}`}>
                                 {isMobile ? 'Tap a skill to play.' : 'Click a skill to play.'}
@@ -534,9 +537,13 @@ export const Stack = () => {
                             {stackItems.map((item, index) => (
                                 <motion.div 
                                     key={item.id}
-                                    initial={{ opacity: 0, y: 50 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.1 }}
+                                    initial={{ opacity: 0, y: 36 }}
+                                    animate={sectionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 36 }}
+                                    transition={{
+                                        delay: sectionInView ? 0.15 + index * 0.05 : 0,
+                                        duration: 0.4,
+                                        ease: [0.25, 0.46, 0.45, 0.94],
+                                    }}
                                     whileTap={{ scale: 0.9 }}
                                     onHoverStart={() => setHoveredIcon(item.id)}
                                     onHoverEnd={() => setHoveredIcon(null)}
