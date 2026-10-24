@@ -87,7 +87,7 @@ export function Portfolio() {
             >
                 <div className="text-center px-4">
                     <h2
-                        className={`font-bold tracking-tight ${
+                        className={`font-bold tracking-tight text-gray-200 ${
                             isMobile ? "text-3xl" : "text-5xl"
                         }`}
                     >
@@ -107,7 +107,7 @@ export function Portfolio() {
             >
                 <div className="text-center px-4">
                     <h2
-                        className={`font-bold tracking-tight mb-4 ${
+                        className={`font-bold tracking-tight text-gray-200 mb-4 ${
                             isMobile ? "text-3xl" : "text-5xl"
                         }`}
                     >
@@ -132,8 +132,8 @@ export function Portfolio() {
                     animate="visible"
                 >
                     <h2
-                        className={`font-bold tracking-tight text-white ${
-                            isMobile ? "text-3xl" : "text-5xl md:text-6xl"
+                        className={`font-bold tracking-tight text-gray-200 ${
+                            isMobile ? "text-3xl" : "text-5xl"
                         }`}
                     >
                         Selected Projects

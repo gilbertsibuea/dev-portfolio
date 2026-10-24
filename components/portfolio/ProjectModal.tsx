@@ -63,6 +63,20 @@ export function ProjectModal({
         if (!isOpen) setSidebarOpen(false)
     }, [isOpen])
 
+    // Lock page scroll while modal is open (prevents background scroll on mobile)
+    useEffect(() => {
+        if (!isOpen) return
+        const { body, documentElement } = document
+        const prevBody = body.style.overflow
+        const prevHtml = documentElement.style.overflow
+        body.style.overflow = "hidden"
+        documentElement.style.overflow = "hidden"
+        return () => {
+            body.style.overflow = prevBody
+            documentElement.style.overflow = prevHtml
+        }
+    }, [isOpen])
+
     useEffect(() => {
         if (!isOpen) return
         const onKey = (e: KeyboardEvent) => {
@@ -136,7 +150,7 @@ export function ProjectModal({
                     leaveFrom="opacity-100 scale-100"
                     leaveTo="opacity-0 scale-95"
                 >
-                    <div className="fixed inset-0 flex">
+                    <div className="fixed inset-0 flex h-dvh max-h-dvh overflow-hidden overscroll-none">
                         {/* Desktop sidebar */}
                         {!isMobile && (
                             <aside className="w-72 shrink-0 border-r border-white/10 bg-[#14132a] flex flex-col z-10">
@@ -186,7 +200,7 @@ export function ProjectModal({
                         )}
 
                         {/* Main stage */}
-                        <div className="relative flex-1 flex flex-col min-w-0 min-h-0">
+                        <div className="relative flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
                             {/* Toolbar */}
                             <div className="absolute top-3 left-3 right-3 z-20 flex items-center justify-between gap-2 pointer-events-none">
                                 <div className="flex items-center gap-1 pointer-events-auto">
@@ -239,12 +253,12 @@ export function ProjectModal({
                                 </div>
                             </div>
 
-                            {/* Media + swipe */}
+                            {/* Media + description */}
                             <div className="relative flex-1 min-h-0 overflow-hidden">
                                 <AnimatePresence mode="wait" custom={slideDirection} initial={false}>
                                     <motion.div
                                         key={project.id}
-                                        className="absolute inset-0 grid grid-rows-[minmax(0,1fr)_auto]"
+                                        className="absolute inset-0 flex flex-col min-h-0"
                                         custom={slideDirection}
                                         variants={slideVariants}
                                         initial="enter"
@@ -254,29 +268,34 @@ export function ProjectModal({
                                             duration: 0.28,
                                             ease: [0.25, 0.46, 0.45, 0.94],
                                         }}
-                                        drag="x"
-                                        dragConstraints={{ left: 0, right: 0 }}
-                                        dragElastic={0.18}
-                                        onDragEnd={handleDragEnd}
                                     >
-                                        {/* Large preview — takes remaining space */}
-                                        <div className="relative min-h-0 bg-black/40">
+                                        {/* Preview — swipe only here, not on description */}
+                                        <motion.div
+                                            className={`relative min-h-0 bg-black/40 shrink-0 ${
+                                                isMobile ? "h-[42dvh]" : "flex-1"
+                                            }`}
+                                            drag="x"
+                                            dragConstraints={{ left: 0, right: 0 }}
+                                            dragElastic={0.18}
+                                            onDragEnd={handleDragEnd}
+                                        >
                                             <ProjectMedia
                                                 src={imageSrc}
                                                 title={project.title}
                                                 contain
                                             />
                                             <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#14132a] to-transparent pointer-events-none" />
-                                        </div>
+                                        </motion.div>
 
-                                        {/* Description panel — capped + scrollable */}
+                                        {/* Description — independent vertical scroll */}
                                         <div
                                             className={`
                                                 bg-[#14132a] border-t border-white/10
-                                                max-h-[32vh] md:max-h-[28vh]
-                                                overflow-y-auto scrollbar-modern
-                                                ${isMobile ? "p-4" : "px-10 py-5"}
+                                                flex-1 min-h-0
+                                                overflow-y-auto overscroll-contain touch-pan-y scrollbar-modern
+                                                ${isMobile ? "p-4 pb-8 max-h-[58dvh]" : "px-10 py-5 max-h-[28vh]"}
                                             `}
+                                            onTouchMove={(e) => e.stopPropagation()}
                                         >
                                             <div className="max-w-4xl">
                                                 <p className="text-xs uppercase tracking-[0.18em] text-violet-300/70 mb-2">
