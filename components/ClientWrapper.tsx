@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Preloader from './Preloader'
+import { PreloaderProvider } from './PreloaderContext'
 
 interface ClientWrapperProps {
   children: React.ReactNode
@@ -9,15 +10,19 @@ interface ClientWrapperProps {
 
 export default function ClientWrapper({ children }: ClientWrapperProps) {
   const [isPreloaderVisible, setIsPreloaderVisible] = useState(true)
+  const [isPreloaderComplete, setIsPreloaderComplete] = useState(false)
 
   return (
-    <>
-      {/* Children always render — no blocking */}
+    <PreloaderProvider isComplete={isPreloaderComplete}>
       {children}
-      {/* Preloader sits on top as a fixed overlay */}
       {isPreloaderVisible && (
-        <Preloader onLoadComplete={() => setIsPreloaderVisible(false)} />
+        <Preloader
+          onLoadComplete={() => {
+            setIsPreloaderComplete(true)
+            setIsPreloaderVisible(false)
+          }}
+        />
       )}
-    </>
+    </PreloaderProvider>
   )
 }

@@ -3,9 +3,11 @@
 import { useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { FiArrowRight, FiMail } from "react-icons/fi"
+import { usePreloader } from "./PreloaderContext"
 
 export const Hero = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
+    const { isComplete: isPreloaderComplete } = usePreloader()
 
     useEffect(() => {
         const canvas = canvasRef.current
@@ -105,30 +107,71 @@ export const Hero = () => {
         })
     }
 
-    // Animation variants for staggered entrance
+    const easeOut: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94]
+
+    // Staggered entrance — starts only after preloader finishes
     const containerVariants = {
         hidden: { opacity: 0 },
         visible: {
             opacity: 1,
             transition: {
-                staggerChildren: 0.2,
-                delayChildren: 0.1
-            }
-        }
+                staggerChildren: 0.18,
+                delayChildren: 0.1,
+            },
+        },
     }
 
     const itemVariants = {
-        hidden: { opacity: 0, y: 30 },
+        hidden: { opacity: 0, y: 36 },
         visible: {
             opacity: 1,
             y: 0,
             transition: {
-                duration: 0.6,
-                ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number]
-            }
-        }
+                duration: 0.7,
+                ease: easeOut,
+            },
+        },
     }
 
+    const titleVariants = {
+        hidden: { opacity: 0, y: 48, scale: 0.94 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            transition: {
+                duration: 0.8,
+                ease: easeOut,
+            },
+        },
+    }
+
+    const socialContainerVariants = {
+        hidden: { opacity: 0, y: 40 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                duration: 0.7,
+                ease: easeOut,
+                staggerChildren: 0.08,
+                delayChildren: 0.2,
+            },
+        },
+    }
+
+    const socialItemVariants = {
+        hidden: { opacity: 0, y: 16, scale: 0.8 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            transition: {
+                duration: 0.4,
+                ease: easeOut,
+            },
+        },
+    }
 
     return(
         <section id="hero" className="relative grid min-h-screen place-content-center overflow-hidden px-4 py-24 text-gray-200">
@@ -151,17 +194,21 @@ export const Hero = () => {
                 className="z-10 flex w-full max-w-4xl flex-col items-center text-center"
                 variants={containerVariants}
                 initial="hidden"
-                animate="visible"
+                animate={isPreloaderComplete ? "visible" : "hidden"}
             >
-               
-                {/* LCP elements: render immediately visible, no animation delay */}
-                <h1 className="text-white/40 text-5xl sm:text-6xl md:text-7xl font-black text-center">
+                <motion.h1
+                    variants={titleVariants}
+                    className="text-white/40 text-5xl sm:text-6xl md:text-7xl font-black text-center"
+                >
                     Hi, I am
-                </h1>
+                </motion.h1>
                 
-                <h1 className="w-full max-w-3xl bg-gradient-to-br from-white to-gray-400 bg-clip-text font-black leading-tight text-transparent text-5xl sm:text-6xl md:text-7xl text-center">
+                <motion.h1
+                    variants={titleVariants}
+                    className="w-full max-w-3xl bg-gradient-to-br from-white to-gray-400 bg-clip-text font-black leading-tight text-transparent text-5xl sm:text-6xl md:text-7xl text-center"
+                >
                     Gilbert Hasiholan Sibuea
-                </h1>
+                </motion.h1>
 
                 <motion.p 
                     variants={itemVariants}
@@ -219,13 +266,7 @@ export const Hero = () => {
 
                 {/* Social Links Container */}
                 <motion.div
-                    initial={{ opacity: 0, y: 60 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ 
-                        duration: 0.8, 
-                        delay: 0.8, 
-                        ease: [0.25, 0.46, 0.45, 0.94] 
-                    }}
+                    variants={socialContainerVariants}
                     whileHover={{
                         scale: 1.02,
                         transition: { duration: 0.2 }
@@ -248,9 +289,7 @@ export const Hero = () => {
                         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.12)_50%,transparent_75%)] bg-[length:250%_250%] group-hover:bg-[position:100%_100%] transition-[background-position] duration-500 z-10" />
                         
                         <motion.span 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 1 }}
+                            variants={itemVariants}
                             className="mb-3 text-gray-300 font-semibold tracking-wide text-sm relative z-40"
                         >
                             Find me on
@@ -258,9 +297,7 @@ export const Hero = () => {
                         
                         <motion.ul 
                             className="flex gap-5 flex-wrap justify-center relative z-40"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 1.2, staggerChildren: 0.1 }}
+                            variants={socialContainerVariants}
                         >
                             {[
                                 {
@@ -295,12 +332,10 @@ export const Hero = () => {
                                     rotate: 8,
                                     viewBox: "0 0 448 512"
                                 }
-                            ].map((social, index) => (
+                            ].map((social) => (
                                 <motion.li
                                     key={social.label}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 1.3 + index * 0.1 }}
+                                    variants={socialItemVariants}
                                 >
                                     <motion.a
                                         href={social.href}
