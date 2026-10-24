@@ -209,14 +209,17 @@ export const Hero = () => {
 
     const easeOut: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94]
 
-    // Staggered entrance — starts only after preloader finishes
+    // Staggered entrance — starts only after preloader zoom finishes
     const containerVariants = {
-        hidden: { opacity: 0 },
+        hidden: { opacity: 0, scale: 1.06 },
         visible: {
             opacity: 1,
+            scale: 1,
             transition: {
+                duration: 0.55,
+                ease: easeOut,
                 staggerChildren: 0.18,
-                delayChildren: 0.1,
+                delayChildren: 0.05,
             },
         },
     }
