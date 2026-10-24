@@ -8,7 +8,7 @@ export const siteConfig = {
   ogImage: '/profile.png',
   links: {
     twitter: 'https://twitter.com/gilbert_dev', // Update with actual handle
-    github: 'https://github.com/ILMNX',
+    github: 'https://github.com/gilbertsibuea',
     linkedin: 'https://www.linkedin.com/in/gilbert-sibuea-93b524246/',
   },
   creator: 'Gilbert Sibuea',

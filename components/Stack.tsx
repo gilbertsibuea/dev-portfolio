@@ -655,7 +655,7 @@ export const Stack = () => {
                         >
                             {/* Enhanced Game UI */}
                             <div className={`absolute top-2 left-2 sm:top-4 sm:left-4 text-left bg-black/50 ${isMobile ? 'p-2' : 'p-3'} rounded-lg backdrop-blur-sm`}>
-                                <p className={`text-violet-300 ${isMobile ? 'text-xs' : 'text-sm'} font-medium`}>🎯 Tech Hunter</p>
+                                <p className={`text-violet-300 ${isMobile ? 'text-xs' : 'text-sm'} font-medium`}>Tech Hunter</p>
                                 <p className={`text-green-400 ${isMobile ? 'text-base' : 'text-lg'} font-bold`}>Score: {score}</p>
                                 <p className={`text-blue-400 ${isMobile ? 'text-xs' : 'text-sm'}`}>Total Hits: {totalHits}</p>
                                 <p className={`text-yellow-400 ${isMobile ? 'text-xs' : 'text-sm'}`}>Active: {activeIconsCount}</p>

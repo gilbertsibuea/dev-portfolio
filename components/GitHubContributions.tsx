@@ -13,7 +13,7 @@ interface ContributionWeek {
   contributionDays: ContributionDay[];
 }
 
-const GitHubContributions = ({ username = "ILMNX" }: { username?: string }) => {
+const GitHubContributions = ({ username = "gilbertsibuea" }: { username?: string }) => {
   const [contributions, setContributions] = useState<ContributionWeek[]>([]);
   const [totalContributions, setTotalContributions] = useState(0);
   const [isLoading, setIsLoading] = useState(true);

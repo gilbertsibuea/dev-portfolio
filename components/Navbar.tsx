@@ -59,7 +59,7 @@ export const Navbar = () => {
                              <Link 
                                 href={link.path} 
                                 onClick={(e) => handleScroll(e, link.path)}
-                                className="px-6 py-3 rounded-xl text-base font-semibold
+                                className="px-6 py-3 rounded-xl text-base 
                                          hover:bg-white/20 hover:text-white hover:shadow-[0_4px_20px_0_rgba(255,255,255,0.2)]
                                          transition-all duration-300 ease-in-out
                                          active:scale-95 whitespace-nowrap"

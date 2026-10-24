@@ -151,7 +151,7 @@ export const KeyMetrics = () => {
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ delay: 0.7, duration: 0.8, type: "spring", stiffness: 80 }}
             >
-                <GitHubContributions username="ILMNX" />
+                <GitHubContributions username="gilbertsibuea" />
             </motion.div>
             {/* <WakatimeTracker /> */}
             </div>

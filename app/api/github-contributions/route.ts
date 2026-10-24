@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const username = searchParams.get('username') || 'ILMNX';
+    const username = searchParams.get('username') || 'gilbertsibuea';
 
     const query = `
       query($username: String!) {
