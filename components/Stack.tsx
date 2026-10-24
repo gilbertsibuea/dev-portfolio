@@ -413,19 +413,16 @@ export const Stack = () => {
 
             <div className='max-w-[1200px] mx-auto px-4 text-center relative z-10'>
                 <motion.h2 
-                    className={`${isMobile ? 'text-3xl' : 'text-5xl'} text-center text-gray-200 mb-8`}
+                    className={`${isMobile ? 'text-3xl' : 'text-5xl'} text-center text-gray-200 font-bold tracking-tight mb-8`}
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
                 >
-                    My Tech Stack {gameMode && (
-                        <motion.span 
-                            className="text-violet-400 block sm:inline mt-2 sm:mt-0"
-                            animate={{ scale: [1, 1.1, 1] }}
-                            transition={{ duration: 0.5, repeat: Infinity }}
-                        >
-                            {isMobile ? `Score: ${score}` : `- Score: ${score}`}
-                        </motion.span>
+                    My Tech Stack
+                    {gameMode && (
+                        <span className="text-gray-500 font-medium block sm:inline mt-2 sm:mt-0 sm:ml-3 text-xl sm:text-2xl tabular-nums">
+                            {score}
+                        </span>
                     )}
                 </motion.h2>
 
@@ -433,81 +430,84 @@ export const Stack = () => {
                 <AnimatePresence>
                     {showIntro && (
                         <motion.div
-                            className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                            className="fixed inset-0 bg-black/92 z-50 flex items-center justify-center p-6"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                         >
-                            <div className="text-center text-white max-w-md">
+                            <div className="text-center max-w-sm w-full">
                                 <AnimatePresence mode="wait">
                                     {introStep === 0 && (
                                         <motion.div
                                             key="step0"
-                                            initial={{ opacity: 0, scale: 0.5 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            exit={{ opacity: 0, scale: 1.5 }}
-                                            className="space-y-4"
+                                            initial={{ opacity: 0, y: 8 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -8 }}
+                                            transition={{ duration: 0.35 }}
                                         >
-                                            <motion.div 
-                                                className={`${isMobile ? 'text-4xl' : 'text-6xl'}`}
-                                                animate={{ rotate: 360 }}
-                                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                                            >
-                                                🎯
-                                            </motion.div>
-                                            <h3 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-violet-400`}>Welcome to Tech Hunter!</h3>
+                                            <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-3">
+                                                Mini game
+                                            </p>
+                                            <h3 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-white tracking-tight`}>
+                                                Shoot the stack
+                                            </h3>
                                         </motion.div>
                                     )}
                                     
                                     {introStep === 1 && (
                                         <motion.div
                                             key="step1"
-                                            initial={{ opacity: 0, x: -100 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: 100 }}
-                                            className="space-y-4"
+                                            initial={{ opacity: 0, y: 8 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -8 }}
+                                            transition={{ duration: 0.35 }}
+                                            className="space-y-3"
                                         >
-                                            <div className={`${isMobile ? 'text-3xl' : 'text-4xl'}`}>🎮</div>
-                                            <h3 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>Your Mission:</h3>
-                                            <p className={`${isMobile ? 'text-base' : 'text-lg'} text-gray-300`}>Hunt down floating tech skills with your precision cannon!</p>
-                                            <p className="text-sm text-violet-300">✨ Unlimited respawning targets!</p>
+                                            <h3 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-white tracking-tight`}>
+                                                What you&apos;re doing
+                                            </h3>
+                                            <p className={`${isMobile ? 'text-sm' : 'text-base'} text-gray-400 leading-relaxed`}>
+                                                Icons drift around. Hit them with the cannon. They come back after a short pause.
+                                            </p>
                                         </motion.div>
                                     )}
                                     
                                     {introStep === 2 && (
                                         <motion.div
                                             key="step2"
-                                            initial={{ opacity: 0, y: 100 }}
+                                            initial={{ opacity: 0, y: 8 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -100 }}
+                                            exit={{ opacity: 0, y: -8 }}
+                                            transition={{ duration: 0.35 }}
                                             className="space-y-4"
                                         >
-                                            <div className={`${isMobile ? 'text-3xl' : 'text-4xl'}`}>🎯</div>
-                                            <h3 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>How to Play:</h3>
-                                            <p className={`${isMobile ? 'text-base' : 'text-lg'} text-gray-300`}>
-                                                {isMobile ? 'Tap anywhere to aim and shoot!' : 'Click anywhere to aim and shoot!'}
-                                            </p>
-                                            <p className="text-sm text-violet-300">Each hit = 10 points</p>
-                                            <p className="text-xs text-green-300">🔄 Targets respawn automatically!</p>
+                                            <h3 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-white tracking-tight`}>
+                                                Controls
+                                            </h3>
+                                            <ul className={`${isMobile ? 'text-sm' : 'text-base'} text-gray-400 space-y-2 text-left mx-auto w-fit`}>
+                                                <li className="flex gap-3">
+                                                    <span className="text-gray-600 tabular-nums w-4 shrink-0">1</span>
+                                                    <span>{isMobile ? 'Tap to aim and fire' : 'Click to aim and fire'}</span>
+                                                </li>
+                                                <li className="flex gap-3">
+                                                    <span className="text-gray-600 tabular-nums w-4 shrink-0">2</span>
+                                                    <span>10 points per hit</span>
+                                                </li>
+                                            </ul>
                                         </motion.div>
                                     )}
                                     
                                     {introStep === 3 && (
                                         <motion.div
                                             key="step3"
-                                            initial={{ opacity: 0, scale: 0 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            exit={{ opacity: 0, scale: 2 }}
-                                            className="space-y-4"
+                                            initial={{ opacity: 0, y: 8 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0 }}
+                                            transition={{ duration: 0.35 }}
                                         >
-                                            <motion.div 
-                                                className={`${isMobile ? 'text-4xl' : 'text-6xl'}`}
-                                                animate={{ scale: [1, 1.5, 1] }}
-                                                transition={{ duration: 0.5, repeat: 2 }}
-                                            >
-                                                🚀
-                                            </motion.div>
-                                            <h3 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-green-400`}>Game Starting...</h3>
+                                            <h3 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-white tracking-tight`}>
+                                                Ready
+                                            </h3>
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
@@ -518,27 +518,15 @@ export const Stack = () => {
 
                 {!gameMode ? (
                     <>
-                        {/* Engaging Text */}
                         <motion.div 
-                            className="mb-8 space-y-4"
+                            className="mb-8"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
                         >
-                            <motion.p 
-                                className={`text-violet-400 ${isMobile ? 'text-base' : 'text-lg'} font-semibold`}
-                                animate={{ 
-                                    scale: [1, 1.05, 1],
-                                    textShadow: [
-                                        "0 0 0px #8b5cf6",
-                                        "0 0 10px #8b5cf6",
-                                        "0 0 0px #8b5cf6"
-                                    ]
-                                }}
-                                transition={{ duration: 2, repeat: Infinity }}
-                            >
-                                {isMobile ? 'Tap any tech skill below to start the hunt!' : 'Click any tech skill below to start the hunt!'}
-                            </motion.p>
+                            <p className={`text-gray-400 ${isMobile ? 'text-sm' : 'text-base'}`}>
+                                {isMobile ? 'Tap a skill to play.' : 'Click a skill to play.'}
+                            </p>
                         </motion.div>
 
                         {/* Enhanced Stack Display with Game Trigger */}
@@ -565,58 +553,19 @@ export const Stack = () => {
                                         transition={{ duration: 0.3 }}
                                     />
                                     
-                                    {/* Game hint overlay */}
-                                    <motion.div
-                                        className="absolute inset-0 bg-gradient-to-t from-violet-600/20 to-transparent rounded-xl opacity-0"
-                                        animate={{
-                                            opacity: hoveredIcon === item.id ? 1 : 0
-                                        }}
-                                        transition={{ duration: 0.3 }}
-                                    />
-                                    
-                                    {/* Play icon hint */}
-                                    <motion.div
-                                        className="absolute top-1 right-1 sm:top-2 sm:right-2 text-violet-400 opacity-0 text-sm"
-                                        animate={{
-                                            opacity: hoveredIcon === item.id ? 1 : 0,
-                                            scale: hoveredIcon === item.id ? [0.8, 1.2, 1] : 1
-                                        }}
-                                        transition={{ duration: 0.3 }}
-                                    >
-                                        🎮
-                                    </motion.div>
-                                    
                                     <motion.div 
                                         className='mb-1 sm:mb-2 p-1 sm:p-2 rounded-xl relative z-10'
-                                        animate={hoveredIcon === item.id ? {
-                                            rotate: [0, -8, 8, -8, 0],
-                                            scale: [1, 1.1, 1]
-                                        } : {}}
-                                        transition={{ duration: 0.6 }}
+                                        animate={hoveredIcon === item.id ? { scale: 1.06 } : { scale: 1 }}
+                                        transition={{ duration: 0.2 }}
                                     >
                                         {React.createElement(item.icon, {
-                                            className: `${isMobile ? 'w-8 h-8' : 'w-12 h-12'} sm:w-16 sm:h-16 transition-all duration-300`,
-                                            style: { 
-                                                color: item.color,
-                                                filter: hoveredIcon === item.id ? 'brightness(1.3) drop-shadow(0 0 15px currentColor)' : 'none'
-                                            }
+                                            className: `${isMobile ? 'w-8 h-8' : 'w-12 h-12'} sm:w-16 sm:h-16 transition-colors duration-200`,
+                                            style: { color: item.color }
                                         })}
                                     </motion.div>
-                                    <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-400 font-semibold relative z-10 group-hover:text-white transition-colors text-center`}>
+                                    <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-400 font-medium relative z-10 transition-colors text-center`}>
                                         {item.name}
                                     </p>
-                                    
-                                    {/* Subtle animation hint */}
-                                    {/* <motion.div
-                                        className="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-xs text-violet-300 opacity-0"
-                                        animate={{
-                                            opacity: hoveredIcon === item.id ? [0, 1, 0] : 0,
-                                            y: hoveredIcon === item.id ? [0, -5, 0] : 0
-                                        }}
-                                        transition={{ duration: 1, repeat: Infinity }}
-                                    >
-                                        {isMobile ? 'Tap to play!' : 'Click to play!'}
-                                    </motion.div> */}
                                 </motion.div>
                             ))}
                         </div>
@@ -624,27 +573,27 @@ export const Stack = () => {
                 ) : (
                     // Game Mode
                     <div className="space-y-4">
-                        <div className="flex justify-center space-x-2 sm:space-x-4">
+                        <div className="flex justify-center gap-3">
                             <button
                                 onClick={() => {
                                     setGameMode(false);
                                     setScore(0);
                                 }}
-                                className={`${isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2'} bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-white font-semibold`}
+                                className={`${isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2'} border border-white/15 hover:border-white/30 rounded-lg transition-colors text-gray-300 hover:text-white font-medium`}
                             >
-                                Exit Game
+                                Exit
                             </button>
                             <button
                                 onClick={initializeGame}
-                                className={`${isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2'} bg-green-600 hover:bg-green-700 rounded-lg transition-colors text-white font-semibold`}
+                                className={`${isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2'} border border-white/15 hover:border-white/30 rounded-lg transition-colors text-gray-300 hover:text-white font-medium`}
                             >
-                                Reset Game
+                                Reset
                             </button>
                         </div>
 
                         <div 
                             ref={gameRef}
-                            className="relative bg-black/20 rounded-xl border border-violet-500/30 mx-auto cursor-crosshair overflow-hidden backdrop-blur-sm w-full"
+                            className="relative bg-black/30 rounded-xl border border-white/10 mx-auto cursor-crosshair overflow-hidden w-full"
                             style={{ 
                                 width: gameArea.width, 
                                 height: gameArea.height,
@@ -653,15 +602,16 @@ export const Stack = () => {
                             onClick={handleShoot}
                             onTouchStart={handleShoot}
                         >
-                            {/* Enhanced Game UI */}
-                            <div className={`absolute top-2 left-2 sm:top-4 sm:left-4 text-left bg-black/50 ${isMobile ? 'p-2' : 'p-3'} rounded-lg backdrop-blur-sm`}>
-                                <p className={`text-violet-300 ${isMobile ? 'text-xs' : 'text-sm'} font-medium`}>Tech Hunter</p>
-                                <p className={`text-green-400 ${isMobile ? 'text-base' : 'text-lg'} font-bold`}>Score: {score}</p>
-                                <p className={`text-blue-400 ${isMobile ? 'text-xs' : 'text-sm'}`}>Total Hits: {totalHits}</p>
-                                <p className={`text-yellow-400 ${isMobile ? 'text-xs' : 'text-sm'}`}>Active: {activeIconsCount}</p>
-                                <p className={`text-gray-400 text-xs`}>
-                                    {isMobile ? 'Tap to shoot!' : 'Click to shoot!'}
-                                </p>
+                            {/* Scoreboard */}
+                            <div className={`absolute top-2 left-2 sm:top-4 sm:left-4 text-left font-mono ${isMobile ? 'text-[11px]' : 'text-xs'} leading-relaxed`}>
+                                <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-gray-500">
+                                    <span>score</span>
+                                    <span className="text-white tabular-nums text-right">{score}</span>
+                                    <span>hits</span>
+                                    <span className="text-gray-300 tabular-nums text-right">{totalHits}</span>
+                                    <span>active</span>
+                                    <span className="text-gray-300 tabular-nums text-right">{activeIconsCount}</span>
+                                </div>
                             </div>
 
                             {/* Floating Icons */}
