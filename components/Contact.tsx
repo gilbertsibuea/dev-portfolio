@@ -3,6 +3,7 @@
 import { motion } from "framer-motion"
 import { FaWhatsapp, FaLinkedin } from "react-icons/fa"
 import { FiArrowUpRight, FiMail } from "react-icons/fi"
+import { SpotifyNowPlaying } from "./SpotifyNowPlaying"
 
 const channels = [
     {
@@ -54,48 +55,66 @@ export const Contact = () => {
                     </p>
                 </motion.div>
 
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-60px" }}
-                    transition={{ duration: 0.5, delay: 0.12 }}
-                    className="mt-14 md:mt-20 border-t border-white/10"
-                >
-                    <ul className="divide-y divide-white/10">
-                        {channels.map((channel, index) => {
-                            const Icon = channel.icon
-                            return (
-                                <motion.li
-                                    key={channel.label}
-                                    initial={{ opacity: 0, x: -12 }}
-                                    whileInView={{ opacity: 1, x: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ duration: 0.4, delay: 0.08 + index * 0.06 }}
-                                >
-                                    <a
-                                        href={channel.href}
-                                        target={channel.href.startsWith("mailto:") ? undefined : "_blank"}
-                                        rel={channel.href.startsWith("mailto:") ? undefined : "noreferrer"}
-                                        className="group flex items-center gap-4 sm:gap-6 py-6 sm:py-7 transition-colors"
+                <div className="mt-14 md:mt-20 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start border-t border-white/10 pt-10 md:pt-12">
+                    {/* Left — Spotify */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.45, delay: 0.08 }}
+                        className="lg:col-span-5"
+                    >
+                        <SpotifyNowPlaying />
+                    </motion.div>
+
+                    {/* Right — channels */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.45, delay: 0.14 }}
+                        className="lg:col-span-7"
+                    >
+                        <ul className="divide-y divide-white/10 border-t border-white/10 lg:border-t-0 lg:-mt-0">
+                            {channels.map((channel, index) => {
+                                const Icon = channel.icon
+                                return (
+                                    <motion.li
+                                        key={channel.label}
+                                        initial={{ opacity: 0, x: -12 }}
+                                        whileInView={{ opacity: 1, x: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ duration: 0.4, delay: 0.1 + index * 0.06 }}
                                     >
-                                        <Icon className={`shrink-0 text-2xl ${channel.accent}`} />
+                                        <a
+                                            href={channel.href}
+                                            target={channel.href.startsWith("mailto:") ? undefined : "_blank"}
+                                            rel={
+                                                channel.href.startsWith("mailto:")
+                                                    ? undefined
+                                                    : "noreferrer"
+                                            }
+                                            className="group flex items-center gap-4 sm:gap-6 py-5 sm:py-6 transition-colors"
+                                        >
+                                            <Icon className={`shrink-0 text-2xl ${channel.accent}`} />
 
-                                        <span className="min-w-0 flex-1 text-left">
-                                            <span className="block text-[10px] uppercase tracking-[0.18em] text-white/35 mb-1">
-                                                {channel.label}
+                                            <span className="min-w-0 flex-1 text-left">
+                                                <span className="block text-[10px] uppercase tracking-[0.18em] text-white/35 mb-1">
+                                                    {channel.label}
+                                                </span>
+                                                <span className="block text-lg sm:text-xl font-semibold text-white/85 group-hover:text-white transition-colors truncate">
+                                                    {channel.value}
+                                                </span>
                                             </span>
-                                            <span className="block text-lg sm:text-xl md:text-2xl font-semibold text-white/85 group-hover:text-white transition-colors truncate">
-                                                {channel.value}
-                                            </span>
-                                        </span>
 
-                                        <FiArrowUpRight className="shrink-0 text-xl text-white/25 group-hover:text-violet-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
-                                    </a>
-                                </motion.li>
-                            )
-                        })}
-                    </ul>
-                </motion.div>
+                                            <FiArrowUpRight className="shrink-0 text-xl text-white/25 group-hover:text-violet-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                                        </a>
+                                    </motion.li>
+                                )
+                            })}
+                        </ul>
+                    </motion.div>
+                </div>
             </div>
         </section>
     )
