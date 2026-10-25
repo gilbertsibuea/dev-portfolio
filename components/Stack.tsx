@@ -1,133 +1,116 @@
 "use client"
 
-import React, { useEffect, useMemo, useRef, useState } from "react"
-import { FaReact, FaLaravel, FaPython, FaJava, FaPhp, FaDocker, FaGitAlt } from "react-icons/fa"
-import { FaFlutter } from "react-icons/fa6"
-import { SiJavascript, SiTypescript, SiMysql, SiTailwindcss, SiSqlite, SiExpress } from "react-icons/si"
-import { TbBrandNextjs } from "react-icons/tb"
+import { useEffect, useRef, useState } from "react"
 import { motion, useInView } from "framer-motion"
+import { RadialWheel, WHEEL_INNER_R, WHEEL_OUTER_R } from "./stack/RadialWheel"
+import { SkillDetailsPanel } from "./stack/SkillDetailsPanel"
+import {
+    ACTIVATION_KEY_LABEL,
+    SKILL_CATEGORIES,
+} from "./stack/skillCategories"
+import { useRadialMenu } from "./stack/useRadialMenu"
 
-const stackItems = [
-    { id: 1, name: "React", icon: FaReact, color: "#61DAFB" },
-    { id: 2, name: "Laravel", icon: FaLaravel, color: "#FF2D20" },
-    { id: 3, name: "Javascript", icon: SiJavascript, color: "#F7DF1E" },
-    { id: 4, name: "Typescript", icon: SiTypescript, color: "#3178C6" },
-    { id: 5, name: "MySQL", icon: SiMysql, color: "#4479A1" },
-    { id: 6, name: "Next.js", icon: TbBrandNextjs, color: "#000000" },
-    { id: 7, name: "Python", icon: FaPython, color: "#3776AB" },
-    { id: 8, name: "Flutter", icon: FaFlutter, color: "#02569B" },
-    { id: 9, name: "Java", icon: FaJava, color: "#FF0000" },
-    { id: 10, name: "PHP", icon: FaPhp, color: "#777BB4" },
-    { id: 11, name: "Docker", icon: FaDocker, color: "#2496ED" },
-    { id: 12, name: "Tailwind", icon: SiTailwindcss, color: "#38BDF8" },
-    { id: 13, name: "Git", icon: FaGitAlt, color: "#F05032" },
-    { id: 14, name: "SQLite", icon: SiSqlite, color: "#003B57" },
-    { id: 15, name: "Express", icon: SiExpress, color: "#000000" },
-]
+function usePrefersReducedMotion() {
+    const [reduced, setReduced] = useState(false)
+    useEffect(() => {
+        const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
+        const update = () => setReduced(mq.matches)
+        update()
+        mq.addEventListener("change", update)
+        return () => mq.removeEventListener("change", update)
+    }, [])
+    return reduced
+}
 
 export const Stack = () => {
-    const [hoveredIcon, setHoveredIcon] = useState<number | null>(null)
-    const [isClient, setIsClient] = useState(false)
     const sectionRef = useRef<HTMLElement>(null)
-    const sectionInView = useInView(sectionRef, { once: true, amount: 0.2, margin: "-80px 0px" })
+    const wheelRef = useRef<HTMLDivElement>(null)
+    const sectionInView = useInView(sectionRef, {
+        once: true,
+        amount: 0.15,
+        margin: "-60px 0px",
+    })
+    const reducedMotion = usePrefersReducedMotion()
 
-    useEffect(() => {
-        setIsClient(true)
-    }, [])
+    const menu = useRadialMenu({
+        wheelRef,
+        innerR: WHEEL_INNER_R,
+        outerR: WHEEL_OUTER_R,
+        reducedMotion,
+    })
 
-    const backgroundParticles = useMemo(() => {
-        if (!isClient) return []
-        return Array.from({ length: 20 }, (_, i) => ({
-            id: i,
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            duration: 3 + Math.random() * 2,
-            delay: Math.random() * 2,
-        }))
-    }, [isClient])
+    const previewCategory = SKILL_CATEGORIES[menu.previewIndex]
 
     return (
         <section
             ref={sectionRef}
-            className="glass relative overflow-hidden rounded-t-2xl bg-gradient-to-br from-slate-900/50 via-purple-900/20 to-slate-900/50 py-16 backdrop-blur-sm"
             id="stack"
+            className="relative overflow-hidden rounded-t-2xl bg-gradient-to-br from-slate-900/50 via-purple-900/20 to-slate-900/50 py-16 backdrop-blur-sm md:py-24"
         >
-            {isClient && sectionInView && (
-                <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                    {backgroundParticles.map((particle) => (
-                        <motion.div
-                            key={particle.id}
-                            className="absolute h-1 w-1 rounded-full bg-violet-400/30"
-                            animate={{
-                                x: [0, 100, 0],
-                                y: [0, -100, 0],
-                                opacity: [0, 1, 0],
-                            }}
-                            transition={{
-                                duration: particle.duration,
-                                repeat: Infinity,
-                                delay: particle.delay,
-                            }}
-                            style={{
-                                left: particle.left,
-                                top: particle.top,
-                            }}
-                        />
-                    ))}
-                </div>
-            )}
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(139,92,246,0.14),transparent_60%)]" />
 
-            <div className="relative z-10 mx-auto max-w-[1200px] px-4 text-center">
-                <motion.h2
-                    className="mb-10 text-3xl font-bold tracking-tight text-gray-200 sm:text-5xl"
-                    initial={{ opacity: 0, y: 28 }}
-                    animate={sectionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
-                    transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
+            <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
+                <motion.div
+                    initial={{ opacity: 0, y: 22 }}
+                    animate={sectionInView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    className="mx-auto max-w-2xl text-center"
                 >
-                    My Tech Stack
-                </motion.h2>
+                    <p className="text-xs uppercase tracking-[0.22em] text-violet-300/70">
+                        Stack
+                    </p>
+                    <h2 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl">
+                        Skills wheel
+                    </h2>
+                    <p className="mt-3 text-sm text-white/50 sm:text-base">
+                        Hold the orb (or{" "}
+                        <kbd className="rounded border border-white/15 bg-white/5 px-1.5 py-0.5 font-mono text-[11px] text-violet-200">
+                            {ACTIVATION_KEY_LABEL}
+                        </kbd>
+                        ) to open categories, aim, then release to select. Esc cancels.
+                    </p>
+                </motion.div>
 
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                    {stackItems.map((item, index) => (
-                        <motion.div
-                            key={item.id}
-                            initial={{ opacity: 0, y: 36 }}
-                            animate={sectionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 36 }}
-                            transition={{
-                                delay: sectionInView ? 0.15 + index * 0.05 : 0,
-                                duration: 0.4,
-                                ease: [0.25, 0.46, 0.45, 0.94],
-                            }}
-                            onHoverStart={() => setHoveredIcon(item.id)}
-                            onHoverEnd={() => setHoveredIcon(null)}
-                            className="relative flex flex-col items-center justify-center overflow-hidden rounded-xl border border-transparent bg-white/5 p-2 transition-all duration-300 hover:border-violet-500/50 hover:bg-white/15 sm:p-8"
-                        >
-                            <motion.div
-                                className="absolute inset-0 rounded-xl opacity-0"
-                                animate={{
-                                    opacity: hoveredIcon === item.id ? 0.3 : 0,
-                                    background: `radial-gradient(circle, ${item.color}40, transparent)`,
-                                }}
-                                transition={{ duration: 0.3 }}
-                            />
+                <motion.div
+                    initial={{ opacity: 0, y: 28 }}
+                    animate={sectionInView ? { opacity: 1, y: 0 } : {}}
+                    transition={{
+                        duration: 0.55,
+                        delay: 0.08,
+                        ease: [0.25, 0.46, 0.45, 0.94],
+                    }}
+                    className="mt-10 grid grid-cols-1 items-center gap-10 lg:mt-14 lg:grid-cols-12 lg:gap-10"
+                >
+                    <div className="flex justify-center lg:col-span-6">
+                        <RadialWheel
+                            mode={menu.mode}
+                            confirmedIndex={menu.confirmedIndex}
+                            highlightedIndex={menu.highlightedIndex}
+                            previewIndex={menu.previewIndex}
+                            reducedMotion={reducedMotion}
+                            wheelRef={wheelRef}
+                            onPointerDown={menu.onPointerDown}
+                            onPointerMove={menu.onPointerMove}
+                            onPointerUp={menu.onPointerUp}
+                            onPointerCancel={menu.onPointerCancel}
+                            onPointerLeave={menu.onPointerLeave}
+                        />
+                    </div>
 
-                            <motion.div
-                                className="relative z-10 mb-1 rounded-xl p-1 sm:mb-2 sm:p-2"
-                                animate={hoveredIcon === item.id ? { scale: 1.06 } : { scale: 1 }}
-                                transition={{ duration: 0.2 }}
-                            >
-                                {React.createElement(item.icon, {
-                                    className:
-                                        "h-8 w-8 transition-colors duration-200 sm:h-16 sm:w-16",
-                                    style: { color: item.color },
-                                })}
-                            </motion.div>
-                            <p className="relative z-10 text-center text-xs font-medium text-gray-400 transition-colors sm:text-sm">
-                                {item.name}
-                            </p>
-                        </motion.div>
-                    ))}
-                </div>
+                    <div className="lg:col-span-6">
+                        {previewCategory && (
+                            <div className="rounded-2xl border border-white/10 bg-[#16142e]/60 p-5 sm:p-7">
+                                <SkillDetailsPanel
+                                    category={previewCategory}
+                                    index={menu.previewIndex}
+                                    total={SKILL_CATEGORIES.length}
+                                    isPreview={menu.isPreview}
+                                    reducedMotion={reducedMotion}
+                                />
+                            </div>
+                        )}
+                    </div>
+                </motion.div>
             </div>
         </section>
     )

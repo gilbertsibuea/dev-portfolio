@@ -2,8 +2,7 @@
 
 import Link from "next/link"
 import React, { useState, useRef, useEffect } from "react"
-import {AiOutlineMenu, AiOutlineClose} from "react-icons/ai"
-import { AiOutlineHome } from "react-icons/ai"
+import { AiOutlineMenu, AiOutlineClose } from "react-icons/ai"
 
 const navLinks = [
     { title: "Stack", path: "#stack" },
