@@ -425,7 +425,7 @@ export const Hero = () => {
                                     viewBox: "0 0 1024 1024"
                                 },
                                 {
-                                    href: "https://www.linkedin.com/in/gilberthasiholan/",
+                                    href: "https://www.linkedin.com/in/gilbertsibuea/",
                                     label: "LinkedIn",
                                     color: "#1E67C6",
                                     icon: "M100.28 448H7.4V148.6h92.88zm-46.44-339.2c-29.9 0-54.1-24.2-54.1-54.1S24.94 0 54.84 0c29.9 0 54.1 24.2 54.1 54.1s-24.2 54.1-54.1 54.1zM447.6 448h-92.8V302c0-34.5-.7-78.8-47.9-78.8-47.9 0-55 .7-55 .7v224h-92.8V148.6h89v40h1c12.4-23.5 42.7-48 87.8-48 94 0 111 .6 111 .6v91z",

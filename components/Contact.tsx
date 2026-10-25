@@ -23,7 +23,7 @@ const channels = [
     {
         label: "LinkedIn",
         value: "Gilbert Sibuea",
-        href: "https://www.linkedin.com/in/gilbert-sibuea-93b524246/",
+        href: "https://www.linkedin.com/in/gilbertsibuea/",
         icon: FaLinkedin,
         accent: "text-sky-400",
     },

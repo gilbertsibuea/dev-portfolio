@@ -3,8 +3,12 @@
 import { useRef } from "react"
 import Link from "next/link"
 import { motion, useInView } from "framer-motion"
+import { FaLinkedin } from "react-icons/fa"
 import { FiArrowUpRight, FiMapPin } from "react-icons/fi"
 import GitHubContributions from "./GitHubContributions"
+
+const LINKEDIN_URL =
+    "https://www.linkedin.com/in/gilbertsibuea/"
 
 const fadeUp = {
     hidden: { opacity: 0, y: 20 },
@@ -93,6 +97,18 @@ export const KeyMetrics = () => {
                                 let&apos;s talk.
                             </p>
                         </div>
+
+                        <a
+                            href={LINKEDIN_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group mt-7 inline-flex items-center gap-3 border border-white/15 bg-transparent px-4 py-2.5 text-sm text-white/85 transition-[border-color,background-color,color] duration-200 hover:border-[#0A66C2]/55 hover:bg-[#0A66C2]/10 hover:text-white"
+                        >
+                            <FaLinkedin className="text-lg text-[#0A66C2] transition-transform duration-200 group-hover:scale-110" />
+                            <span className="font-medium tracking-wide">
+                                LinkedIn
+                            </span>
+                        </a>
 
                         {/* Fact strip — not cards */}
                         <dl className="mt-10 flex flex-wrap gap-x-8 gap-y-4 text-sm border-t border-white/10 pt-6">

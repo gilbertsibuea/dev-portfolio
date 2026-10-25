@@ -301,7 +301,7 @@ export const Services = () => {
                         How I work
                     </h2>
                     <p className="mt-4 max-w-2xl text-white/50 text-base md:text-lg leading-relaxed">
-                        From discovery to continuous improvement — follow the checkpoint path.
+                        From discovery to continuous improvement, follow the checkpoint path.
                         Click any stop to see what happens there.
                     </p>
                 </motion.div>
@@ -531,18 +531,14 @@ export const Services = () => {
                                     exit={{ opacity: 0, y: -8 }}
                                     transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
                                 >
-                                    <div className="flex items-center gap-3 mb-5">
-                                        <span className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-violet-300 bg-violet-600 text-white">
-                                            <StepIcon className="text-lg" />
+                                    <div className="mb-6 flex items-start gap-4 sm:gap-5">
+                                        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-2 border-violet-300 bg-violet-600 text-white sm:h-16 sm:w-16">
+                                            <StepIcon className="text-2xl sm:text-3xl" />
                                         </span>
-                                        <p className="font-mono text-xs text-violet-300/80 tabular-nums">
-                                            Checkpoint {String(step.id).padStart(2, "0")} / 07
-                                        </p>
+                                        <h3 className="pt-0.5 text-2xl font-bold leading-tight tracking-tight text-white sm:pt-1 sm:text-3xl md:text-4xl">
+                                            {step.title}
+                                        </h3>
                                     </div>
-
-                                    <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
-                                        {step.title}
-                                    </h3>
                                     <p className="mt-4 text-white/65 leading-relaxed text-base md:text-lg">
                                         {step.detail}
                                     </p>
