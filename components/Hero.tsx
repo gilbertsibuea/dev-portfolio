@@ -339,7 +339,7 @@ export const Hero = () => {
                     className="flex flex-col sm:flex-row gap-4 items-center"
                 >
                     <motion.button
-                        onClick={() => window.open('https://www.canva.com/design/DAGhsbBQGPo/Cq0wE9ktnUkrnOQnH4F9KA/view?utm_content=DAGhsbBQGPo&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h6f3875e230', '_blank')}
+                        onClick={() => window.open('https://canva.link/2mju5fhef5q8f39', '_blank')}
                         whileHover={{ 
                             scale: 1.05,
                             boxShadow: "0 10px 25px rgba(255,255,255,0.1)"

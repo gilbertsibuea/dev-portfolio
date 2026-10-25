@@ -7,8 +7,8 @@ import { AiOutlineHome } from "react-icons/ai"
 
 const navLinks = [
     { title: "Stack", path: "#stack" },
+    { title: "Experience", path: "#experience" },
     { title: "Portfolio", path: "#portfolio" },
-    { title: <AiOutlineHome className="inline-block align-middle mb-[2px]" />, path: "#hero" },
     { title: "About", path: "#about" },
     { title: "Contact", path: "#contact" },
 ]

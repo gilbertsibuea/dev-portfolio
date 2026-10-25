@@ -11,6 +11,10 @@ const Stack = dynamic(() => import("@/components/Stack").then(mod => ({ default:
   loading: () => <div className="h-96 animate-pulse bg-gray-200" />
 });
 
+const Experience = dynamic(() => import("@/components/Experience").then(mod => ({ default: mod.Experience })), {
+  loading: () => <div className="h-96 animate-pulse bg-gray-200" />
+});
+
 const LogoAnimation = dynamic(() => import("@/components/LogoAnimation").then(mod => ({ default: mod.LogoAnimation })), {
   loading: () => <div className="h-64 animate-pulse bg-gray-200" />
 });
@@ -47,6 +51,7 @@ export default function Home() {
       <Navbar />
       <Hero />
       <Stack />
+      <Experience />
       <LogoAnimation/>
       <Portfolio/>
       <KeyMetrics/>
