@@ -1,11 +1,13 @@
 import { turso } from './turso';
-import { createProjectsTable, createAdminTable } from './schema';
+import { createProjectsTable, createAdminTable, createExperiencePanelsTable } from './schema';
+import { seedExperiencePanels } from './experience';
 import bcrypt from 'bcryptjs';
 
 export async function initializeDatabase() {
   try {
     await turso.execute(createProjectsTable);
     await turso.execute(createAdminTable);
+    await turso.execute(createExperiencePanelsTable);
 
     try {
       const columnCheckResult = await turso.execute(`PRAGMA table_info(projects)`);
@@ -59,6 +61,9 @@ export async function initializeDatabase() {
         args: ['admin', passwordHash]
       });
     }
+
+    // Seed Professional Journey panels once when empty
+    await seedExperiencePanels(false);
   } catch {
     // Silent fail for initialization
   }

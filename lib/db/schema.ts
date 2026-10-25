@@ -31,3 +31,16 @@ export const createAdminTable = `
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )
 `;
+
+/** Professional Journey carousel panels */
+export const createExperiencePanelsTable = `
+  CREATE TABLE IF NOT EXISTS experience_panels (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug TEXT NOT NULL UNIQUE,
+    kind TEXT NOT NULL CHECK(kind IN ('feature', 'stack')),
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    jobs_json TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`;

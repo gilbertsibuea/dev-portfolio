@@ -11,6 +11,7 @@ const AdminDashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [projectCount, setProjectCount] = useState<number | null>(null)
+  const [experienceCount, setExperienceCount] = useState<number | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -23,21 +24,30 @@ const AdminDashboard = () => {
     setIsAuthenticated(true)
     setIsLoading(false)
 
-    // Fetch project count from API
-    const fetchProjectCount = async () => {
+    const fetchCounts = async () => {
       try {
-        const res = await fetch('/api/projects', { cache: 'no-store' })
-        const data = await res.json()
-        if (data.success && Array.isArray(data.projects)) {
-          setProjectCount(data.projects.length)
-        } else {
-          setProjectCount(0)
-        }
+        const [projectsRes, experienceRes] = await Promise.all([
+          fetch('/api/projects', { cache: 'no-store' }),
+          fetch('/api/experience', { cache: 'no-store' }),
+        ])
+        const projectsData = await projectsRes.json()
+        const experienceData = await experienceRes.json()
+        setProjectCount(
+          projectsData.success && Array.isArray(projectsData.projects)
+            ? projectsData.projects.length
+            : 0
+        )
+        setExperienceCount(
+          experienceData.success && Array.isArray(experienceData.panels)
+            ? experienceData.panels.length
+            : 0
+        )
       } catch {
         setProjectCount(0)
+        setExperienceCount(0)
       }
     }
-    fetchProjectCount()
+    fetchCounts()
   }, [router])
 
   const handleLogout = () => {
@@ -80,7 +90,7 @@ const AdminDashboard = () => {
 
       {/* Admin Content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Stats Card - Projects */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -103,7 +113,28 @@ const AdminDashboard = () => {
             </Link>
           </motion.div>
 
-          {/* Stats Card - Messages */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.05 }}
+            className="bg-gray-900 p-6 rounded-xl"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Experience</h2>
+              <span className="text-2xl font-bold text-violet-500">
+                {experienceCount !== null ? experienceCount : '...'}
+              </span>
+            </div>
+            <p className="text-gray-400 mb-4">Professional Journey carousel panels</p>
+            <Link
+              href="/admin/experience"
+              className="inline-block px-4 py-2 bg-violet-600 hover:bg-violet-700 rounded-lg transition-colors"
+            >
+              Manage Experience
+            </Link>
+          </motion.div>
+
+          {/* Stats Card - Health */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -148,6 +179,17 @@ const AdminDashboard = () => {
               >
                 <span className="block text-2xl mb-2">⭐</span>
                 <span>Selected Projects</span>
+              </motion.div>
+            </Link>
+
+            <Link href="/admin/experience">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-gray-900 p-4 rounded-xl text-center hover:bg-gray-800 transition-colors"
+              >
+                <span className="block text-2xl mb-2">🧭</span>
+                <span>Experience</span>
               </motion.div>
             </Link>
 

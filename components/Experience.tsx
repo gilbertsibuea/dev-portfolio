@@ -14,20 +14,14 @@ import {
     FiChevronRight,
     FiMapPin,
 } from "react-icons/fi"
+import type {
+    ExperienceJob,
+    ExperienceJobTag,
+    ExperiencePanel,
+} from "@/lib/experience-types"
 
-type JobTag = "Full Time" | "Contract" | "Freelance" | "Project" | "Education"
-
-type Job = {
-    org: string
-    role: string
-    tag: JobTag
-    period: string
-    location?: string
-    summary?: string
-    highlights?: string[]
-    mark: string
-    markColor: string
-}
+type Job = ExperienceJob
+type JobTag = ExperienceJobTag
 
 type Panel =
     | { id: string; kind: "feature"; job: Job }
@@ -41,110 +35,34 @@ const TAG_STYLE: Record<JobTag, string> = {
     Education: "bg-teal-500/20 text-teal-300 border-teal-400/30",
 }
 
-const PANELS: Panel[] = [
-    {
-        id: "saidata",
-        kind: "feature",
-        job: {
-            org: "SAIDATA · Universitas Lampung",
-            role: "Full Stack Developer",
-            tag: "Full Time",
-            period: "Nov 2025 – Aug 2026",
-            location: "Bandar Lampung · On-site",
-            summary:
-                "Built and shipped SAIDATA — a production digital-admin platform for faculties across Unila. Configurable service menus, multi-stage approval workflows, document generation with QR verification, JWT/SSO, Redis, and Docker.",
-            highlights: [
-                "Laravel 12 + React 19 SPA + PostgreSQL",
-                "Workflow engine, form builder, campus SSO integrations",
-                "Presented the system to faculty admins at BPKHM Unila",
-            ],
-            mark: "SU",
-            markColor: "#2dd4bf",
-        },
-    },
-    {
-        id: "wium",
-        kind: "stack",
-        jobs: [
-            {
-                org: "WIUM Indonesia",
-                role: "Full Stack · E-Retirement",
-                tag: "Contract",
-                period: "Apr 2024 – Apr 2025",
-                location: "Remote",
-                summary:
-                    "Multi-level pension & retirement workflows with RBAC, PDF exports, audit trails, and real-time notifications.",
-                mark: "ER",
-                markColor: "#818cf8",
-            },
-            {
-                org: "WIUM Indonesia",
-                role: "Full Stack · AdGenda",
-                tag: "Contract",
-                period: "May 2025 – Aug 2025",
-                location: "Remote",
-                summary:
-                    "Committee meetings, live voting Presentation Mode, decision letters, and calendar-driven agenda workflows.",
-                mark: "AG",
-                markColor: "#c084fc",
-            },
-        ],
-    },
-    {
-        id: "client",
-        kind: "stack",
-        jobs: [
-            {
-                org: "SPMB Prestasi Prima",
-                role: "Full Stack Developer",
-                tag: "Project",
-                period: "Oct 2025 – Jan 2026",
-                location: "Remote",
-                summary:
-                    "SMA/SMK admission & payment platform — registration wizard, BRI BRIVA VAs, validator queues, and cycle reporting.",
-                mark: "SP",
-                markColor: "#38bdf8",
-            },
-            {
-                org: "Independent",
-                role: "Freelance Full Stack",
-                tag: "Freelance",
-                period: "2024 – Present",
-                location: "Bandung · Remote",
-                summary:
-                    "Client web & mobile apps — Laravel, Next.js, React Native — from scope to ship with clean handoff.",
-                mark: "FS",
-                markColor: "#34d399",
-            },
-        ],
-    },
-    {
-        id: "education",
-        kind: "stack",
-        jobs: [
-            {
-                org: "Universitas Lampung",
-                role: "B.Sc. Computer Science",
-                tag: "Education",
-                period: "2022 – 2026",
-                location: "Bandar Lampung · GPA 3.68 / 4.00",
-                summary:
-                    "Software engineering focus; production fullstack work through campus digital-transformation projects.",
-                mark: "UL",
-                markColor: "#22c55e",
-            },
-            {
-                org: "SMA BPK PENABUR Bandarlampung",
-                role: "Natural Sciences",
-                tag: "Education",
-                period: "2019 – 2022",
-                location: "Bandar Lampung",
-                mark: "PB",
-                markColor: "#f59e0b",
-            },
-        ],
-    },
-]
+function mapApiPanels(panels: ExperiencePanel[]): Panel[] {
+    const mapped: Panel[] = []
+    for (const panel of panels) {
+        if (panel.kind === "feature" && panel.jobs[0]) {
+            mapped.push({
+                id: panel.slug || String(panel.id),
+                kind: "feature",
+                job: panel.jobs[0],
+            })
+            continue
+        }
+        if (panel.jobs.length >= 2) {
+            mapped.push({
+                id: panel.slug || String(panel.id),
+                kind: "stack",
+                jobs: [panel.jobs[0], panel.jobs[1]],
+            })
+        } else if (panel.jobs[0]) {
+            // Fallback: single job shown as feature
+            mapped.push({
+                id: panel.slug || String(panel.id),
+                kind: "feature",
+                job: panel.jobs[0],
+            })
+        }
+    }
+    return mapped
+}
 
 function Mark({ mark, color }: { mark: string; color: string }) {
     return (
@@ -297,9 +215,32 @@ export const Experience = () => {
     const [index, setIndex] = useState(0)
     /** On mobile: whether card 1 (not just the title) is the focused view of step 1 */
     const [card1Focused, setCard1Focused] = useState(false)
+    const [panels, setPanels] = useState<Panel[]>([])
+    const [loading, setLoading] = useState(true)
 
-    const total = PANELS.length
-    const [firstPanel, ...restPanels] = PANELS
+    useEffect(() => {
+        let cancelled = false
+        const load = async () => {
+            try {
+                const res = await fetch("/api/experience", { cache: "no-store" })
+                const data = await res.json()
+                if (!cancelled && data.success && Array.isArray(data.panels)) {
+                    setPanels(mapApiPanels(data.panels as ExperiencePanel[]))
+                }
+            } catch {
+                if (!cancelled) setPanels([])
+            } finally {
+                if (!cancelled) setLoading(false)
+            }
+        }
+        load()
+        return () => {
+            cancelled = true
+        }
+    }, [])
+
+    const total = panels.length
+    const [firstPanel, ...restPanels] = panels
 
     const measureCard1Focus = useCallback(() => {
         const el = scrollerRef.current
@@ -452,6 +393,37 @@ export const Experience = () => {
     const titleBright = index === 0 && (!isMobile || !card1Focused)
     const card1Bright = index === 0 && (!isMobile || card1Focused)
 
+    if (loading) {
+        return (
+            <section
+                id="experience"
+                className="relative bg-[#0f0e1c] py-20 text-white"
+            >
+                <div className="mx-auto max-w-6xl px-4 text-white/40">
+                    Loading experience…
+                </div>
+            </section>
+        )
+    }
+
+    if (panels.length === 0) {
+        return (
+            <section
+                id="experience"
+                className="relative bg-[#0f0e1c] py-20 text-white"
+            >
+                <div className="mx-auto max-w-6xl px-4">
+                    <h2 className="text-4xl font-bold tracking-tight sm:text-6xl">
+                        Professional Journey
+                    </h2>
+                    <p className="mt-4 text-white/45">
+                        Experience panels will appear here once added in admin.
+                    </p>
+                </div>
+            </section>
+        )
+    }
+
     return (
         <section
             ref={sectionRef}
@@ -519,7 +491,7 @@ export const Experience = () => {
                     </button>
 
                     <div className="flex items-center gap-2">
-                        {PANELS.map((panel, i) => (
+                        {panels.map((panel, i) => (
                             <button
                                 key={panel.id}
                                 type="button"
