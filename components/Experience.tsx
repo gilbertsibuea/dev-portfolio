@@ -9,7 +9,6 @@ import {
 } from "react"
 import { motion, useInView } from "framer-motion"
 import {
-    FiBriefcase,
     FiCalendar,
     FiChevronLeft,
     FiChevronRight,
@@ -33,7 +32,6 @@ type Job = {
 type Panel =
     | { id: string; kind: "feature"; job: Job }
     | { id: string; kind: "stack"; jobs: [Job, Job] }
-    | { id: string; kind: "academic"; title: string; jobs: Job[] }
 
 const TAG_STYLE: Record<JobTag, string> = {
     "Full Time": "bg-sky-500/20 text-sky-300 border-sky-400/30",
@@ -121,9 +119,8 @@ const PANELS: Panel[] = [
         ],
     },
     {
-        id: "academic",
-        kind: "academic",
-        title: "Academic",
+        id: "education",
+        kind: "stack",
         jobs: [
             {
                 org: "Universitas Lampung",
@@ -152,7 +149,7 @@ const PANELS: Panel[] = [
 function Mark({ mark, color }: { mark: string; color: string }) {
     return (
         <span
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-sm font-bold tracking-tight text-[#0c0a1a]"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold tracking-tight text-[#0c0a1a] sm:h-10 sm:w-10"
             style={{ backgroundColor: color }}
             aria-hidden
         >
@@ -173,7 +170,7 @@ function Tag({ tag }: { tag: JobTag }) {
 
 function Meta({ period, location }: { period: string; location?: string }) {
     return (
-        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-white/45">
+        <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] text-white/45 sm:mt-3 sm:gap-x-4 sm:text-xs">
             <span className="inline-flex items-center gap-1.5">
                 <FiCalendar className="opacity-70" />
                 {period}
@@ -190,7 +187,7 @@ function Meta({ period, location }: { period: string; location?: string }) {
 
 function FeatureCard({ job }: { job: Job }) {
     return (
-        <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1c1a36] p-6 sm:p-7">
+        <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1c1a36] p-5 sm:p-7">
             <div
                 aria-hidden
                 className="pointer-events-none absolute -bottom-10 -right-6 h-44 w-44 opacity-[0.12]"
@@ -202,7 +199,7 @@ function FeatureCard({ job }: { job: Job }) {
                 <div className="flex items-start gap-3">
                     <Mark mark={job.mark} color={job.markColor} />
                     <div className="min-w-0 flex-1">
-                        <p className="text-base font-semibold leading-snug text-white sm:text-lg">
+                        <p className="text-[15px] font-semibold leading-snug text-white sm:text-lg">
                             {job.org}
                             <span className="text-white/35"> — </span>
                             <span className="text-violet-300">{job.role}</span>
@@ -214,12 +211,12 @@ function FeatureCard({ job }: { job: Job }) {
                 </div>
                 <Meta period={job.period} location={job.location} />
                 {job.summary && (
-                    <p className="mt-5 text-sm leading-relaxed text-white/60">
+                    <p className="mt-4 line-clamp-4 text-sm leading-relaxed text-white/60 sm:mt-5 sm:line-clamp-none">
                         {job.summary}
                     </p>
                 )}
                 {job.highlights && job.highlights.length > 0 && (
-                    <ul className="mt-auto space-y-2 border-t border-white/10 pt-5 text-sm text-white/55">
+                    <ul className="mt-auto hidden space-y-2 border-t border-white/10 pt-5 text-sm text-white/55 sm:block">
                         {job.highlights.map((line) => (
                             <li key={line} className="flex gap-2">
                                 <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-violet-400/80" />
@@ -235,7 +232,7 @@ function FeatureCard({ job }: { job: Job }) {
 
 function CompactCard({ job }: { job: Job }) {
     return (
-        <article className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1c1a36] p-5">
+        <article className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1c1a36] p-4 sm:p-5">
             <div
                 aria-hidden
                 className="pointer-events-none absolute bottom-2 right-3 h-14 w-14 opacity-[0.16]"
@@ -259,7 +256,7 @@ function CompactCard({ job }: { job: Job }) {
                 </div>
                 <Meta period={job.period} location={job.location} />
                 {job.summary && (
-                    <p className="mt-3 line-clamp-3 text-xs leading-relaxed text-white/55 sm:text-[13px]">
+                    <p className="mt-3 line-clamp-2 text-xs leading-relaxed text-white/55 sm:line-clamp-3 sm:text-[13px]">
                         {job.summary}
                     </p>
                 )}
@@ -268,58 +265,119 @@ function CompactCard({ job }: { job: Job }) {
     )
 }
 
-function AcademicPanel({ title, jobs }: { title: string; jobs: Job[] }) {
+function PanelView({ panel }: { panel: Panel }) {
+    if (panel.kind === "feature") return <FeatureCard job={panel.job} />
     return (
-        <div className="flex h-full flex-col gap-3 rounded-2xl border border-white/10 bg-[#16142e]/80 p-3 sm:p-4">
-            <p className="px-1 pt-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
-                {title}
-            </p>
-            <div className="flex min-h-0 flex-1 flex-col gap-3">
-                {jobs.map((job) => (
-                    <CompactCard key={`${job.org}-${job.period}`} job={job} />
-                ))}
-            </div>
+        <div className="flex h-full flex-col gap-2.5 sm:gap-3">
+            {panel.jobs.map((job) => (
+                <CompactCard key={`${job.org}-${job.role}-${job.period}`} job={job} />
+            ))}
         </div>
     )
 }
 
-function PanelView({ panel }: { panel: Panel }) {
-    if (panel.kind === "feature") return <FeatureCard job={panel.job} />
-    if (panel.kind === "stack") {
-        return (
-            <div className="flex h-full flex-col gap-3">
-                {panel.jobs.map((job) => (
-                    <CompactCard key={`${job.org}-${job.role}-${job.period}`} job={job} />
-                ))}
-            </div>
-        )
-    }
-    return <AcademicPanel title={panel.title} jobs={panel.jobs} />
+function useIsMobile(breakpoint = 768) {
+    const [mobile, setMobile] = useState(false)
+    useEffect(() => {
+        const mq = window.matchMedia(`(max-width: ${breakpoint - 1}px)`)
+        const update = () => setMobile(mq.matches)
+        update()
+        mq.addEventListener("change", update)
+        return () => mq.removeEventListener("change", update)
+    }, [breakpoint])
+    return mobile
 }
 
 export const Experience = () => {
     const sectionRef = useRef<HTMLElement>(null)
     const scrollerRef = useRef<HTMLDivElement>(null)
+    const firstCardRef = useRef<HTMLDivElement>(null)
     const inView = useInView(sectionRef, { once: true, margin: "-80px" })
+    const isMobile = useIsMobile()
     const [index, setIndex] = useState(0)
-    const total = PANELS.length
+    /** On mobile: whether card 1 (not just the title) is the focused view of step 1 */
+    const [card1Focused, setCard1Focused] = useState(false)
 
-    const scrollToIndex = useCallback((i: number) => {
+    const total = PANELS.length
+    const [firstPanel, ...restPanels] = PANELS
+
+    const measureCard1Focus = useCallback(() => {
         const el = scrollerRef.current
-        if (!el) return
-        const child = el.children[i] as HTMLElement | undefined
-        if (!child) return
-        const left = child.offsetLeft - (el.clientWidth - child.clientWidth) / 2
-        el.scrollTo({ left, behavior: "smooth" })
+        const card = firstCardRef.current
+        if (!el || !card) {
+            setCard1Focused(false)
+            return
+        }
+        if (!window.matchMedia("(max-width: 767px)").matches) {
+            // Desktop sees title + card together — treat card as focused for step 1
+            setCard1Focused(true)
+            return
+        }
+
+        const scrollerRect = el.getBoundingClientRect()
+        const cardRect = card.getBoundingClientRect()
+        const scrollerCenter = scrollerRect.left + scrollerRect.width / 2
+        const cardCenter = cardRect.left + cardRect.width / 2
+        const dist = Math.abs(cardCenter - scrollerCenter)
+        // Card is focused when its center is near the viewport center
+        const focused = dist < scrollerRect.width * 0.42 && cardRect.right > scrollerRect.left + 48
+        setCard1Focused(focused)
     }, [])
 
+    const scrollToStart = useCallback(() => {
+        scrollerRef.current?.scrollTo({ left: 0, behavior: "smooth" })
+    }, [])
+
+    const scrollToFirstCard = useCallback(() => {
+        const el = scrollerRef.current
+        const card = firstCardRef.current
+        if (!el || !card) return
+        const scrollerRect = el.getBoundingClientRect()
+        const cardRect = card.getBoundingClientRect()
+        // Bring card into view with a little left inset
+        const delta = cardRect.left - scrollerRect.left - 16
+        el.scrollTo({ left: el.scrollLeft + delta, behavior: "smooth" })
+    }, [])
+
+    const scrollToIndex = useCallback(
+        (i: number) => {
+            const el = scrollerRef.current
+            if (!el) return
+
+            if (i === 0) {
+                // Mobile step 1 target = card 1 highlighted; desktop = full start
+                if (window.matchMedia("(max-width: 767px)").matches) {
+                    scrollToFirstCard()
+                } else {
+                    scrollToStart()
+                }
+                return
+            }
+
+            const child = el.children[i] as HTMLElement | undefined
+            if (!child) return
+            const left = child.offsetLeft - (el.clientWidth - child.clientWidth) / 2
+            el.scrollTo({ left: Math.max(0, left), behavior: "smooth" })
+        },
+        [scrollToFirstCard, scrollToStart]
+    )
+
     const goPrev = () => {
+        if (isMobile && index === 0 && card1Focused) {
+            scrollToStart()
+            return
+        }
         const next = Math.max(0, index - 1)
         setIndex(next)
         scrollToIndex(next)
     }
 
     const goNext = () => {
+        // Mobile: stay on step 1 until card 1 is highlighted
+        if (isMobile && index === 0 && !card1Focused) {
+            scrollToFirstCard()
+            return
+        }
         const next = Math.min(total - 1, index + 1)
         setIndex(next)
         scrollToIndex(next)
@@ -330,74 +388,132 @@ export const Experience = () => {
         if (!el) return
 
         const onScroll = () => {
+            measureCard1Focus()
+
+            const children = Array.from(el.children) as HTMLElement[]
+            if (children.length === 0) return
+
+            const scrollerLeft = el.getBoundingClientRect().left
             const center = el.scrollLeft + el.clientWidth / 2
             let best = 0
             let bestDist = Infinity
-            Array.from(el.children).forEach((child, i) => {
-                const node = child as HTMLElement
-                const mid = node.offsetLeft + node.clientWidth / 2
+
+            children.forEach((node, i) => {
+                const target =
+                    i === 0
+                        ? ((node.lastElementChild as HTMLElement | null) ?? node)
+                        : node
+                const rect = target.getBoundingClientRect()
+                const mid =
+                    el.scrollLeft + (rect.left - scrollerLeft) + rect.width / 2
                 const dist = Math.abs(mid - center)
                 if (dist < bestDist) {
                     bestDist = dist
                     best = i
                 }
             })
+
+            // Still in the first group (title or card 1) → index 0
+            if (best === 0 || el.scrollLeft < (children[0]?.clientWidth ?? 0) * 0.55) {
+                // Prefer index 0 while the first group's card is the nearest target
+                const firstCard = firstCardRef.current
+                if (firstCard) {
+                    const cardRect = firstCard.getBoundingClientRect()
+                    const scrollerRect = el.getBoundingClientRect()
+                    const stillInGroup =
+                        cardRect.left < scrollerRect.right &&
+                        cardRect.right > scrollerRect.left
+                    if (stillInGroup && best <= 1) {
+                        // If second slide is clearly closer, allow index 1+
+                        if (best === 0) {
+                            setIndex(0)
+                            return
+                        }
+                    }
+                }
+            }
+
             setIndex(best)
         }
 
+        onScroll()
         el.addEventListener("scroll", onScroll, { passive: true })
-        return () => el.removeEventListener("scroll", onScroll)
-    }, [])
+        window.addEventListener("resize", onScroll)
+        return () => {
+            el.removeEventListener("scroll", onScroll)
+            window.removeEventListener("resize", onScroll)
+        }
+    }, [measureCard1Focus])
+
+    const prevDisabled = index === 0 && (!isMobile || !card1Focused)
+    const canGoNext =
+        (isMobile && index === 0 && !card1Focused) || index < total - 1
+
+    const titleBright = index === 0 && (!isMobile || !card1Focused)
+    const card1Bright = index === 0 && (!isMobile || card1Focused)
 
     return (
         <section
             ref={sectionRef}
             id="experience"
-            className="relative overflow-hidden bg-[#0f0e1c] text-white py-16 md:py-24"
+            className="relative overflow-hidden bg-[#0f0e1c] text-white py-14 sm:py-16 md:py-24"
         >
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_70%_0%,rgba(139,92,246,0.10),transparent_55%)]" />
-
-            <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={inView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    className="flex flex-col items-center text-center"
-                >
-                    <span className="inline-flex items-center gap-2 rounded-full border border-violet-400/35 bg-violet-500/10 px-4 py-1.5 text-sm font-medium text-violet-200">
-                        <FiBriefcase className="text-violet-300" />
-                        Experience
-                    </span>
-                    <p className="mt-4 max-w-md text-sm text-white/45 sm:text-base">
-                        Swipe through my professional journey
-                    </p>
-                </motion.div>
-            </div>
 
             <motion.div
                 initial={{ opacity: 0, y: 28 }}
                 animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.55, delay: 0.08, ease: [0.25, 0.46, 0.45, 0.94] }}
-                className="relative z-10 mt-10 md:mt-14"
+                transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
+                className="relative z-10"
             >
                 <div
                     ref={scrollerRef}
-                    className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-[max(1rem,calc((100vw-42rem)/2))] pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden"
+                    className="flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto scroll-smooth pr-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 sm:pr-[max(1rem,calc((100vw-26rem)/2))] [&::-webkit-scrollbar]:hidden"
                 >
-                    {PANELS.map((panel, i) => (
-                        <PanelShell key={panel.id} active={i === index}>
+                    {/* Slide 0 — title position unchanged + first card */}
+                    <div className="flex h-[400px] shrink-0 snap-start items-center gap-8 pl-5 sm:h-[460px] sm:gap-16 sm:pl-10 md:gap-20 md:pl-14">
+                        <div
+                            className={`flex w-fit shrink-0 flex-col justify-center transition-opacity duration-300 ${
+                                titleBright ? "opacity-100" : "opacity-40"
+                            }`}
+                        >
+                            <h2 className="font-bold tracking-tight text-white leading-[0.95] text-4xl sm:text-6xl md:text-7xl">
+                                <span className="block whitespace-nowrap">Professional</span>
+                                <span className="mt-1.5 block whitespace-nowrap sm:mt-2">
+                                    Journey
+                                </span>
+                            </h2>
+                            <p className="mt-5 max-w-[16rem] text-sm text-white/70 sm:mt-10 sm:max-w-sm sm:text-lg">
+                                Swipe through my professional journey
+                            </p>
+                        </div>
+
+                        {firstPanel && (
+                            <div
+                                ref={firstCardRef}
+                                className={`h-full w-[min(85vw,22rem)] shrink-0 transition-opacity duration-300 sm:w-[26rem] ${
+                                    card1Bright ? "opacity-100" : "opacity-55"
+                                }`}
+                            >
+                                <PanelView panel={firstPanel} />
+                            </div>
+                        )}
+                    </div>
+
+                    {restPanels.map((panel, i) => (
+                        <PanelShell key={panel.id} active={i + 1 === index}>
                             <PanelView panel={panel} />
                         </PanelShell>
                     ))}
                 </div>
 
-                <div className="mx-auto mt-8 flex max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+                <div className="mx-auto mt-6 flex max-w-6xl items-center justify-between gap-3 px-4 sm:mt-8 sm:gap-4 sm:px-6">
                     <button
                         type="button"
                         onClick={goPrev}
-                        disabled={index === 0}
+                        disabled={prevDisabled}
                         aria-label="Previous experience"
-                        className="flex h-11 w-11 items-center justify-center rounded-full border border-violet-400/40 bg-[#1c1a36] text-violet-200 transition-colors hover:border-violet-300 hover:bg-violet-500/15 hover:text-white disabled:pointer-events-none disabled:opacity-30"
+                        className="flex h-10 w-10 items-center justify-center rounded-full border border-violet-400/40 bg-[#1c1a36] text-violet-200 transition-colors hover:border-violet-300 hover:bg-violet-500/15 hover:text-white disabled:pointer-events-none disabled:opacity-30 sm:h-11 sm:w-11"
                     >
                         <FiChevronLeft className="text-xl" />
                     </button>
@@ -425,9 +541,9 @@ export const Experience = () => {
                     <button
                         type="button"
                         onClick={goNext}
-                        disabled={index === total - 1}
+                        disabled={!canGoNext}
                         aria-label="Next experience"
-                        className="flex h-11 w-11 items-center justify-center rounded-full border border-violet-400/40 bg-[#1c1a36] text-violet-200 transition-colors hover:border-violet-300 hover:bg-violet-500/15 hover:text-white disabled:pointer-events-none disabled:opacity-30"
+                        className="flex h-10 w-10 items-center justify-center rounded-full border border-violet-400/40 bg-[#1c1a36] text-violet-200 transition-colors hover:border-violet-300 hover:bg-violet-500/15 hover:text-white disabled:pointer-events-none disabled:opacity-30 sm:h-11 sm:w-11"
                     >
                         <FiChevronRight className="text-xl" />
                     </button>
@@ -446,7 +562,7 @@ function PanelShell({
 }) {
     return (
         <div
-            className={`h-[440px] w-[min(88vw,26rem)] shrink-0 snap-center transition-opacity duration-300 sm:h-[460px] sm:w-[26rem] ${
+            className={`h-[400px] w-[min(85vw,22rem)] shrink-0 snap-center transition-opacity duration-300 sm:h-[460px] sm:w-[26rem] ${
                 active ? "opacity-100" : "opacity-55"
             }`}
         >
