@@ -6,10 +6,10 @@ import {AiOutlineMenu, AiOutlineClose} from "react-icons/ai"
 import { AiOutlineHome } from "react-icons/ai"
 
 const navLinks = [
-    { title: "About", path: "#about" },
+    { title: "Stack", path: "#stack" },
     { title: "Portfolio", path: "#portfolio" },
     { title: <AiOutlineHome className="inline-block align-middle mb-[2px]" />, path: "#hero" },
-    { title: "Stack", path: "#stack" },
+    { title: "About", path: "#about" },
     { title: "Contact", path: "#contact" },
 ]
 
