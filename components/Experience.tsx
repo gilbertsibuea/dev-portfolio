@@ -401,7 +401,7 @@ export const Experience = () => {
         <section
             ref={sectionRef}
             id="experience"
-            className="relative overflow-hidden bg-[#0f0e1c] text-white py-14 sm:py-16 md:py-24"
+            className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-[#0f0e1c] py-14 text-white sm:py-16 md:py-20"
         >
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_70%_0%,rgba(139,92,246,0.10),transparent_55%)]" />
 
@@ -419,13 +419,13 @@ export const Experience = () => {
                     </p>
                 </div>
             ) : (
-                <div className="relative z-10">
+                <div className="relative z-10 w-full">
                     <div
                         ref={scrollerRef}
                         className="flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto scroll-smooth pr-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 sm:pr-[max(1rem,calc((100vw-26rem)/2))] [&::-webkit-scrollbar]:hidden"
                     >
                         {/* Slide 0 — title position unchanged + first card */}
-                        <div className="flex h-[400px] shrink-0 snap-start items-center gap-8 pl-5 sm:h-[460px] sm:gap-16 sm:pl-10 md:gap-20 md:pl-14">
+                        <div className="flex h-[min(52vh,420px)] shrink-0 snap-start items-center gap-8 pl-5 sm:h-[min(56vh,480px)] sm:gap-16 sm:pl-10 md:gap-20 md:pl-14">
                             <div
                                 className={`flex w-fit shrink-0 flex-col justify-center transition-opacity duration-300 ${
                                     titleBright ? "opacity-100" : "opacity-40"
@@ -519,7 +519,7 @@ function PanelShell({
 }) {
     return (
         <div
-            className={`h-[400px] w-[min(85vw,22rem)] shrink-0 snap-center transition-opacity duration-300 sm:h-[460px] sm:w-[26rem] ${
+            className={`h-[min(52vh,420px)] w-[min(85vw,22rem)] shrink-0 snap-center transition-opacity duration-300 sm:h-[min(56vh,480px)] sm:w-[26rem] ${
                 active ? "opacity-100" : "opacity-55"
             }`}
         >

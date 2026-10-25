@@ -7,7 +7,7 @@ import { generateMetadata, siteConfig } from '@/lib/metadata';
 import dynamic from 'next/dynamic';
 
 // Lazy load non-critical components
-const Stack = dynamic(() => import("@/components/Stack").then(mod => ({ default: mod.Stack })), {
+const Stack = dynamic(() => import("@/components/Stack"), {
   loading: () => <div className="h-96 animate-pulse bg-gray-200" />
 });
 
@@ -51,9 +51,9 @@ export default function Home() {
       <Navbar />
       <Hero />
       <Stack />
+      <LogoAnimation />
       <Experience />
-      <LogoAnimation/>
-      <Portfolio/>
+      <Portfolio />
       <KeyMetrics/>
       <Services/>
       <Contact/>

@@ -283,9 +283,9 @@ export const Services = () => {
         <section
             ref={sectionRef}
             id="process"
-            className="relative overflow-hidden bg-[#0f0e1a] text-white px-4 py-16 md:py-24"
+            className="relative overflow-hidden bg-[#0f0e1a] text-white px-4 pb-16 pt-8 md:pb-24 md:pt-10"
         >
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(139,92,246,0.12),transparent_50%)]" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_40%,rgba(139,92,246,0.10),transparent_55%)]" />
 
             <div className="relative z-10 max-w-6xl mx-auto">
                 <motion.div

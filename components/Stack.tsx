@@ -45,10 +45,8 @@ export const Stack = () => {
         <section
             ref={sectionRef}
             id="stack"
-            className="relative z-[1] overflow-x-clip overflow-y-visible bg-[#14122a] text-white rounded-3xl py-14 sm:py-16 md:py-24 mb-6 sm:mb-8"
+            className="relative z-10 -mt-4 overflow-hidden rounded-t-3xl bg-[#1F1F1F] text-white py-20 sm:-mt-6 md:-mt-8 md:py-28"
         >
-            <div className="pointer-events-none absolute inset-0 rounded-3xl bg-[radial-gradient(ellipse_at_center,rgba(139,92,246,0.10),transparent_60%)]" />
-
             <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
                 <motion.div
                     initial={{ opacity: 0, y: 22 }}
@@ -113,3 +111,5 @@ export const Stack = () => {
         </section>
     )
 }
+
+export default Stack

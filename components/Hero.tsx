@@ -264,12 +264,12 @@ export const Hero = () => {
     }
 
     return(
-        <section id="hero" className="relative grid min-h-screen place-content-center overflow-visible px-4 py-24 text-gray-200">
+        <section id="hero" className="relative isolate grid min-h-screen place-content-center overflow-hidden px-4 py-24 text-gray-200">
             {/* Lightweight canvas background */}
             <canvas 
                 ref={canvasRef}
-                className="absolute inset-0 w-full h-full -z-10"
-                style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%)' }}
+                className="absolute inset-0 -z-10 h-full w-full"
+                style={{ background: 'linear-gradient(135deg, #1a1838 0%, #14122a 45%, #0f0e1c 100%)' }}
             />
             
             {/* Simplified overlay */}
@@ -277,7 +277,7 @@ export const Hero = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 1 }}
-                className="pointer-events-none absolute inset-0 w-full h-full -z-5 bg-black/10" 
+                className="pointer-events-none absolute inset-0 -z-10 h-full w-full bg-black/10" 
             />
             
             <motion.div 
@@ -392,7 +392,7 @@ export const Hero = () => {
                     <motion.div
                         className="relative rounded-2xl px-6 py-4 shadow-2xl flex flex-col items-center w-full max-w-xl border border-white/10 overflow-hidden"
                         style={{
-                            background: "rgba(20, 30, 40, 0.65)",
+                            background: "rgba(20, 18, 40, 0.72)",
                             backdropFilter: "blur(12px)",
                             WebkitBackdropFilter: "blur(12px)",
                         }}

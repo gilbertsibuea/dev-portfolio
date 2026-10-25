@@ -122,7 +122,7 @@ export const RadialWheel = memo(function RadialWheel({
                 sectorsVisible ? `skill-sector-${previewIndex}` : undefined
             }
             tabIndex={0}
-            className="relative mx-auto aspect-square w-full max-w-[280px] touch-none select-none outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#14122a] sm:max-w-[420px] lg:max-w-[520px]"
+            className="relative mx-auto aspect-square w-full max-w-[280px] touch-none select-none outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1F1F1F] sm:max-w-[420px] lg:max-w-[520px]"
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
@@ -131,7 +131,7 @@ export const RadialWheel = memo(function RadialWheel({
         >
             <svg
                 viewBox={`0 0 ${VIEW} ${VIEW}`}
-                className="h-full w-full drop-shadow-[0_0_32px_rgba(139,92,246,0.18)]"
+                className="h-full w-full"
             >
                 <defs>
                     <radialGradient id="stack-orb-fill" cx="50%" cy="50%" r="50%">
@@ -153,10 +153,10 @@ export const RadialWheel = memo(function RadialWheel({
                     cy={CY}
                     r={WHEEL_OUTER_R + 2}
                     fill="none"
-                    stroke="rgba(255,255,255,0.08)"
-                    strokeWidth={1}
+                    stroke="rgba(167,139,250,0.55)"
+                    strokeWidth={1.5}
                     initial={false}
-                    animate={{ opacity: sectorsVisible ? 1 : 0.35 }}
+                    animate={{ opacity: sectorsVisible ? 1 : 0.75 }}
                     transition={{ duration: reducedMotion ? 0 : 0.25 }}
                 />
 

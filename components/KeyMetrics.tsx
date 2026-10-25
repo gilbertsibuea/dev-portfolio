@@ -34,9 +34,9 @@ export const KeyMetrics = () => {
         <section
             ref={ref}
             id="about"
-            className="relative overflow-hidden bg-[#1a1838] text-white px-4 py-16 md:py-24"
+            className="relative z-10 -mt-4 overflow-hidden rounded-t-3xl bg-[#0f0e1a] text-white px-4 py-16 sm:-mt-6 md:-mt-8 md:pb-8 md:pt-24"
         >
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_20%_0%,rgba(139,92,246,0.12),transparent_50%)]" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(139,92,246,0.12),transparent_50%)]" />
 
             <div className="relative z-10 max-w-6xl mx-auto">
                 <motion.div
@@ -47,7 +47,7 @@ export const KeyMetrics = () => {
                 >
                     {/* Portrait */}
                     <motion.div variants={fadeUp} className="lg:col-span-5">
-                        <div className="relative aspect-[3/4] w-full max-w-md mx-auto lg:mx-0 overflow-hidden ">
+                        <div className="relative aspect-[3/4] w-full max-w-md mx-auto overflow-hidden bg-[#0f0e1a] lg:mx-0">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src="/gilbert-a.webp?v=2"
@@ -55,9 +55,14 @@ export const KeyMetrics = () => {
                                 className="absolute inset-0 h-full w-full object-cover object-[center_18%]"
                                 draggable={false}
                             />
+                            {/* Soft edge blend only — keep subject bright */}
                             <div
                                 aria-hidden
-                                className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#1a1838] via-[#1a1838]/80 to-transparent"
+                                className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_32%,transparent_55%,#0f0e1a_92%)]"
+                            />
+                            <div
+                                aria-hidden
+                                className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#0f0e1a] via-[#0f0e1a]/70 to-transparent"
                             />
                         </div>
                         <p className="mt-3 flex items-center gap-2 text-sm text-white/40 font-mono">

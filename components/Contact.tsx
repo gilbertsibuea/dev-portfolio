@@ -33,7 +33,7 @@ export const Contact = () => {
     return (
         <section
             id="contact"
-            className="relative overflow-hidden bg-[#14122a] text-white py-20 md:py-28 rounded-t-3xl"
+            className="relative overflow-hidden bg-[#1F1F1F] text-white py-20 md:py-28 rounded-t-3xl"
         >
             <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
                 <motion.div
