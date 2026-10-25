@@ -45,9 +45,9 @@ export const Stack = () => {
         <section
             ref={sectionRef}
             id="stack"
-            className="relative overflow-hidden rounded-t-2xl bg-gradient-to-br from-slate-900/50 via-purple-900/20 to-slate-900/50 py-16 backdrop-blur-sm md:py-24"
+            className="relative z-[1] overflow-x-clip overflow-y-visible bg-[#14122a] text-white rounded-3xl py-14 sm:py-16 md:py-24 mb-6 sm:mb-8"
         >
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(139,92,246,0.14),transparent_60%)]" />
+            <div className="pointer-events-none absolute inset-0 rounded-3xl bg-[radial-gradient(ellipse_at_center,rgba(139,92,246,0.10),transparent_60%)]" />
 
             <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
                 <motion.div
@@ -67,7 +67,8 @@ export const Stack = () => {
                         <kbd className="rounded border border-white/15 bg-white/5 px-1.5 py-0.5 font-mono text-[11px] text-violet-200">
                             {ACTIVATION_KEY_LABEL}
                         </kbd>
-                        ) to open categories, aim, then release to select. Esc cancels.
+                        ) to open categories, aim, then release to select. Esc
+                        cancels.
                     </p>
                 </motion.div>
 
@@ -79,7 +80,7 @@ export const Stack = () => {
                         delay: 0.08,
                         ease: [0.25, 0.46, 0.45, 0.94],
                     }}
-                    className="mt-10 grid grid-cols-1 items-center gap-10 lg:mt-14 lg:grid-cols-12 lg:gap-10"
+                    className="mt-8 grid grid-cols-1 items-start gap-6 sm:mt-10 sm:gap-8 lg:mt-14 lg:grid-cols-12 lg:items-center lg:gap-10"
                 >
                     <div className="flex justify-center lg:col-span-6">
                         <RadialWheel
@@ -99,12 +100,9 @@ export const Stack = () => {
 
                     <div className="lg:col-span-6">
                         {previewCategory && (
-                            <div className="rounded-2xl border border-white/10 bg-[#16142e]/60 p-5 sm:p-7">
+                            <div className="rounded-2xl border border-white/10 bg-[#1a1832]/80 p-5 sm:p-7">
                                 <SkillDetailsPanel
                                     category={previewCategory}
-                                    index={menu.previewIndex}
-                                    total={SKILL_CATEGORIES.length}
-                                    isPreview={menu.isPreview}
                                     reducedMotion={reducedMotion}
                                 />
                             </div>

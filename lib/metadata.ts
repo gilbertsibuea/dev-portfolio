@@ -5,7 +5,6 @@ export const siteConfig = {
   title: 'Gilbert Sibuea - Full Stack Developer & Software Engineer | gilbertsibuea.com',
   description: 'Gilbert Sibuea (Gilbert Hasiholan Sibuea) is a passionate Full Stack Developer and Software Engineer based in Bandar Lampung, Indonesia. Specializing in React, Next.js, Node.js, and modern web technologies. Visit gilbertsibuea.com to explore projects and get in touch.',
   url: 'https://gilbertsibuea.com',
-  ogImage: '/profile.png',
   links: {
     twitter: 'https://twitter.com/gilbert_dev', // Update with actual handle
     github: 'https://github.com/gilbertsibuea',
@@ -46,7 +45,6 @@ export const siteConfig = {
 export function generateMetadata({
   title,
   description,
-  image = siteConfig.ogImage,
   url = siteConfig.url,
   noIndex = false,
 }: {
@@ -72,20 +70,12 @@ export function generateMetadata({
       title: metaTitle,
       description: metaDescription,
       siteName: siteConfig.name,
-      images: [
-        {
-          url: image,
-          width: 1200,
-          height: 630,
-          alt: metaTitle,
-        },
-      ],
+
     },
     twitter: {
       card: 'summary_large_image',
       title: metaTitle,
       description: metaDescription,
-      images: [image],
       creator: '@gilbert_dev', // Update with actual Twitter handle
     },
     robots: {
@@ -118,7 +108,6 @@ export const personStructuredData = {
   jobTitle: 'Full Stack Developer',
   description: 'Gilbert Sibuea is a passionate Full Stack Developer and Software Engineer based in Bandar Lampung, Indonesia, specializing in modern web technologies including React, Next.js, and Node.js.',
   url: siteConfig.url,
-  image: `${siteConfig.url}${siteConfig.ogImage}`,
   email: 'contact@gilbertsibuea.com',
   nationality: {
     '@type': 'Country',

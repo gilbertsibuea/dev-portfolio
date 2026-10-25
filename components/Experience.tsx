@@ -7,7 +7,6 @@ import {
     useState,
     type ReactNode,
 } from "react"
-import { motion, useInView } from "framer-motion"
 import {
     FiCalendar,
     FiChevronLeft,
@@ -210,7 +209,6 @@ export const Experience = () => {
     const sectionRef = useRef<HTMLElement>(null)
     const scrollerRef = useRef<HTMLDivElement>(null)
     const firstCardRef = useRef<HTMLDivElement>(null)
-    const inView = useInView(sectionRef, { once: true, margin: "-80px" })
     const isMobile = useIsMobile()
     const [index, setIndex] = useState(0)
     /** On mobile: whether card 1 (not just the title) is the focused view of step 1 */
@@ -223,11 +221,16 @@ export const Experience = () => {
         const load = async () => {
             try {
                 const res = await fetch("/api/experience", { cache: "no-store" })
+                if (!res.ok) throw new Error(`HTTP ${res.status}`)
                 const data = await res.json()
-                if (!cancelled && data.success && Array.isArray(data.panels)) {
+                if (cancelled) return
+                if (data.success && Array.isArray(data.panels)) {
                     setPanels(mapApiPanels(data.panels as ExperiencePanel[]))
+                } else {
+                    setPanels([])
                 }
-            } catch {
+            } catch (err) {
+                console.error("[Experience] failed to load panels:", err)
                 if (!cancelled) setPanels([])
             } finally {
                 if (!cancelled) setLoading(false)
@@ -384,7 +387,8 @@ export const Experience = () => {
             el.removeEventListener("scroll", onScroll)
             window.removeEventListener("resize", onScroll)
         }
-    }, [measureCard1Focus])
+        // Re-bind when panels mount the scroller into the DOM
+    }, [measureCard1Focus, panels.length])
 
     const prevDisabled = index === 0 && (!isMobile || !card1Focused)
     const canGoNext =
@@ -392,37 +396,6 @@ export const Experience = () => {
 
     const titleBright = index === 0 && (!isMobile || !card1Focused)
     const card1Bright = index === 0 && (!isMobile || card1Focused)
-
-    if (loading) {
-        return (
-            <section
-                id="experience"
-                className="relative bg-[#0f0e1c] py-20 text-white"
-            >
-                <div className="mx-auto max-w-6xl px-4 text-white/40">
-                    Loading experience…
-                </div>
-            </section>
-        )
-    }
-
-    if (panels.length === 0) {
-        return (
-            <section
-                id="experience"
-                className="relative bg-[#0f0e1c] py-20 text-white"
-            >
-                <div className="mx-auto max-w-6xl px-4">
-                    <h2 className="text-4xl font-bold tracking-tight sm:text-6xl">
-                        Professional Journey
-                    </h2>
-                    <p className="mt-4 text-white/45">
-                        Experience panels will appear here once added in admin.
-                    </p>
-                </div>
-            </section>
-        )
-    }
 
     return (
         <section
@@ -432,95 +405,107 @@ export const Experience = () => {
         >
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_70%_0%,rgba(139,92,246,0.10),transparent_55%)]" />
 
-            <motion.div
-                initial={{ opacity: 0, y: 28 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
-                className="relative z-10"
-            >
-                <div
-                    ref={scrollerRef}
-                    className="flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto scroll-smooth pr-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 sm:pr-[max(1rem,calc((100vw-26rem)/2))] [&::-webkit-scrollbar]:hidden"
-                >
-                    {/* Slide 0 — title position unchanged + first card */}
-                    <div className="flex h-[400px] shrink-0 snap-start items-center gap-8 pl-5 sm:h-[460px] sm:gap-16 sm:pl-10 md:gap-20 md:pl-14">
-                        <div
-                            className={`flex w-fit shrink-0 flex-col justify-center transition-opacity duration-300 ${
-                                titleBright ? "opacity-100" : "opacity-40"
-                            }`}
-                        >
-                            <h2 className="font-bold tracking-tight text-white leading-[0.95] text-4xl sm:text-6xl md:text-7xl">
-                                <span className="block whitespace-nowrap">Professional</span>
-                                <span className="mt-1.5 block whitespace-nowrap sm:mt-2">
-                                    Journey
-                                </span>
-                            </h2>
-                            <p className="mt-5 max-w-[16rem] text-sm text-white/70 sm:mt-10 sm:max-w-sm sm:text-lg">
-                                Swipe through my professional journey
-                            </p>
-                        </div>
-
-                        {firstPanel && (
+            {loading ? (
+                <div className="relative z-10 mx-auto max-w-6xl px-4 text-white/40">
+                    Loading experience…
+                </div>
+            ) : panels.length === 0 ? (
+                <div className="relative z-10 mx-auto max-w-6xl px-4">
+                    <h2 className="text-4xl font-bold tracking-tight sm:text-6xl">
+                        Professional Journey
+                    </h2>
+                    <p className="mt-4 text-white/45">
+                        Experience panels will appear here once added in admin.
+                    </p>
+                </div>
+            ) : (
+                <div className="relative z-10">
+                    <div
+                        ref={scrollerRef}
+                        className="flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto scroll-smooth pr-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 sm:pr-[max(1rem,calc((100vw-26rem)/2))] [&::-webkit-scrollbar]:hidden"
+                    >
+                        {/* Slide 0 — title position unchanged + first card */}
+                        <div className="flex h-[400px] shrink-0 snap-start items-center gap-8 pl-5 sm:h-[460px] sm:gap-16 sm:pl-10 md:gap-20 md:pl-14">
                             <div
-                                ref={firstCardRef}
-                                className={`h-full w-[min(85vw,22rem)] shrink-0 transition-opacity duration-300 sm:w-[26rem] ${
-                                    card1Bright ? "opacity-100" : "opacity-55"
+                                className={`flex w-fit shrink-0 flex-col justify-center transition-opacity duration-300 ${
+                                    titleBright ? "opacity-100" : "opacity-40"
                                 }`}
                             >
-                                <PanelView panel={firstPanel} />
+                                <h2 className="font-bold tracking-tight text-white leading-[0.95] text-4xl sm:text-6xl md:text-7xl">
+                                    <span className="block whitespace-nowrap">
+                                        Professional
+                                    </span>
+                                    <span className="mt-1.5 block whitespace-nowrap sm:mt-2">
+                                        Journey
+                                    </span>
+                                </h2>
+                                <p className="mt-5 max-w-[16rem] text-sm text-white/70 sm:mt-10 sm:max-w-sm sm:text-lg">
+                                    Swipe through my professional journey
+                                </p>
                             </div>
-                        )}
-                    </div>
 
-                    {restPanels.map((panel, i) => (
-                        <PanelShell key={panel.id} active={i + 1 === index}>
-                            <PanelView panel={panel} />
-                        </PanelShell>
-                    ))}
-                </div>
+                            {firstPanel && (
+                                <div
+                                    ref={firstCardRef}
+                                    className={`h-full w-[min(85vw,22rem)] shrink-0 transition-opacity duration-300 sm:w-[26rem] ${
+                                        card1Bright ? "opacity-100" : "opacity-55"
+                                    }`}
+                                >
+                                    <PanelView panel={firstPanel} />
+                                </div>
+                            )}
+                        </div>
 
-                <div className="mx-auto mt-6 flex max-w-6xl items-center justify-between gap-3 px-4 sm:mt-8 sm:gap-4 sm:px-6">
-                    <button
-                        type="button"
-                        onClick={goPrev}
-                        disabled={prevDisabled}
-                        aria-label="Previous experience"
-                        className="flex h-10 w-10 items-center justify-center rounded-full border border-violet-400/40 bg-[#1c1a36] text-violet-200 transition-colors hover:border-violet-300 hover:bg-violet-500/15 hover:text-white disabled:pointer-events-none disabled:opacity-30 sm:h-11 sm:w-11"
-                    >
-                        <FiChevronLeft className="text-xl" />
-                    </button>
-
-                    <div className="flex items-center gap-2">
-                        {panels.map((panel, i) => (
-                            <button
-                                key={panel.id}
-                                type="button"
-                                aria-label={`Go to slide ${i + 1}`}
-                                aria-current={i === index}
-                                onClick={() => {
-                                    setIndex(i)
-                                    scrollToIndex(i)
-                                }}
-                                className={`h-2.5 rounded-full transition-all ${
-                                    i === index
-                                        ? "w-7 bg-violet-400"
-                                        : "w-2.5 bg-white/20 hover:bg-white/40"
-                                }`}
-                            />
+                        {restPanels.map((panel, i) => (
+                            <PanelShell key={panel.id} active={i + 1 === index}>
+                                <PanelView panel={panel} />
+                            </PanelShell>
                         ))}
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={goNext}
-                        disabled={!canGoNext}
-                        aria-label="Next experience"
-                        className="flex h-10 w-10 items-center justify-center rounded-full border border-violet-400/40 bg-[#1c1a36] text-violet-200 transition-colors hover:border-violet-300 hover:bg-violet-500/15 hover:text-white disabled:pointer-events-none disabled:opacity-30 sm:h-11 sm:w-11"
-                    >
-                        <FiChevronRight className="text-xl" />
-                    </button>
+                    <div className="mx-auto mt-6 flex max-w-6xl items-center justify-between gap-3 px-4 sm:mt-8 sm:gap-4 sm:px-6">
+                        <button
+                            type="button"
+                            onClick={goPrev}
+                            disabled={prevDisabled}
+                            aria-label="Previous experience"
+                            className="flex h-10 w-10 items-center justify-center rounded-full border border-violet-400/40 bg-[#1c1a36] text-violet-200 transition-colors hover:border-violet-300 hover:bg-violet-500/15 hover:text-white disabled:pointer-events-none disabled:opacity-30 sm:h-11 sm:w-11"
+                        >
+                            <FiChevronLeft className="text-xl" />
+                        </button>
+
+                        <div className="flex items-center gap-2">
+                            {panels.map((panel, i) => (
+                                <button
+                                    key={panel.id}
+                                    type="button"
+                                    aria-label={`Go to slide ${i + 1}`}
+                                    aria-current={i === index}
+                                    onClick={() => {
+                                        setIndex(i)
+                                        scrollToIndex(i)
+                                    }}
+                                    className={`h-2.5 rounded-full transition-all ${
+                                        i === index
+                                            ? "w-7 bg-violet-400"
+                                            : "w-2.5 bg-white/20 hover:bg-white/40"
+                                    }`}
+                                />
+                            ))}
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={goNext}
+                            disabled={!canGoNext}
+                            aria-label="Next experience"
+                            className="flex h-10 w-10 items-center justify-center rounded-full border border-violet-400/40 bg-[#1c1a36] text-violet-200 transition-colors hover:border-violet-300 hover:bg-violet-500/15 hover:text-white disabled:pointer-events-none disabled:opacity-30 sm:h-11 sm:w-11"
+                        >
+                            <FiChevronRight className="text-xl" />
+                        </button>
+                    </div>
                 </div>
-            </motion.div>
+            )}
         </section>
     )
 }
@@ -542,3 +527,5 @@ function PanelShell({
         </div>
     )
 }
+
+export default Experience

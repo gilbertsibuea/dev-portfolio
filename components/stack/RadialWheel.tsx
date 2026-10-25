@@ -122,7 +122,7 @@ export const RadialWheel = memo(function RadialWheel({
                 sectorsVisible ? `skill-sector-${previewIndex}` : undefined
             }
             tabIndex={0}
-            className="relative mx-auto aspect-square w-full max-w-[440px] touch-none select-none outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f0e1c] sm:max-w-[520px] lg:max-w-[560px]"
+            className="relative mx-auto aspect-square w-full max-w-[280px] touch-none select-none outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#14122a] sm:max-w-[420px] lg:max-w-[520px]"
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}

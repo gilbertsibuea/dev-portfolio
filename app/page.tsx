@@ -11,7 +11,7 @@ const Stack = dynamic(() => import("@/components/Stack").then(mod => ({ default:
   loading: () => <div className="h-96 animate-pulse bg-gray-200" />
 });
 
-const Experience = dynamic(() => import("@/components/Experience").then(mod => ({ default: mod.Experience })), {
+const Experience = dynamic(() => import("@/components/Experience"), {
   loading: () => <div className="h-96 animate-pulse bg-gray-200" />
 });
 

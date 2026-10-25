@@ -131,21 +131,29 @@ export const EXPERIENCE_SEED: Omit<ExperiencePanelInput, "sortOrder">[] = [
     },
 ]
 
-function rowToPanel(row: ExperienceRow): ExperiencePanel {
-    let jobs: ExperienceJob[] = []
+function parseJobsJson(raw: unknown): ExperienceJob[] {
+    if (Array.isArray(raw)) return raw as ExperienceJob[]
+    if (typeof raw !== "string" || !raw.trim()) return []
     try {
-        const parsed = JSON.parse(row.jobs_json)
-        jobs = Array.isArray(parsed) ? parsed : []
+        const parsed = JSON.parse(raw)
+        return Array.isArray(parsed) ? (parsed as ExperienceJob[]) : []
     } catch {
-        jobs = []
+        return []
     }
+}
+
+function rowToPanel(row: ExperienceRow): ExperiencePanel {
+    // LibSQL may expose columns as snake_case; also tolerate already-parsed JSON
+    const jobsRaw =
+        (row as ExperienceRow & { jobsJson?: unknown }).jobs_json ??
+        (row as ExperienceRow & { jobsJson?: unknown }).jobsJson
 
     return {
-        id: row.id,
-        slug: row.slug,
+        id: Number(row.id),
+        slug: String(row.slug),
         kind: row.kind === "stack" ? "stack" : "feature",
-        sortOrder: row.sort_order,
-        jobs,
+        sortOrder: Number(row.sort_order ?? 0),
+        jobs: parseJobsJson(jobsRaw),
         createdAt: row.created_at,
         updatedAt: row.updated_at,
     }
