@@ -50,8 +50,7 @@ export const Contact = () => {
                         <span className="block text-white/40">together</span>
                     </h2>
                     <p className="mt-6 max-w-lg text-white/50 text-base md:text-lg leading-relaxed">
-                        Open to freelance projects and full-time roles. If you have something
-                        interesting in mind — say hello.
+                        Open to roles, collabs, or just good conversation
                     </p>
                 </motion.div>
 
@@ -79,11 +78,7 @@ export const Contact = () => {
                                         rel={channel.href.startsWith("mailto:") ? undefined : "noreferrer"}
                                         className="group flex items-center gap-4 sm:gap-6 py-6 sm:py-7 transition-colors"
                                     >
-                                        <span
-                                            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] ${channel.accent} group-hover:border-white/25 transition-colors`}
-                                        >
-                                            <Icon className="text-xl" />
-                                        </span>
+                                        <Icon className={`shrink-0 text-2xl ${channel.accent}`} />
 
                                         <span className="min-w-0 flex-1 text-left">
                                             <span className="block text-[10px] uppercase tracking-[0.18em] text-white/35 mb-1">
