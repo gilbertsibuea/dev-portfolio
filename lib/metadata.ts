@@ -5,6 +5,7 @@ export const siteConfig = {
   title: 'Gilbert Sibuea - Full Stack Developer & Software Engineer | gilbertsibuea.com',
   description: 'Gilbert Sibuea (Gilbert Hasiholan Sibuea) is a passionate Full Stack Developer and Software Engineer based in Bandar Lampung, Indonesia. Specializing in React, Next.js, Node.js, and modern web technologies. Visit gilbertsibuea.com to explore projects and get in touch.',
   url: 'https://gilbertsibuea.com',
+  ogImage: '/gilbert-a.webp',
   links: {
     twitter: 'https://twitter.com/gilbert_dev', // Update with actual handle
     github: 'https://github.com/gilbertsibuea',
