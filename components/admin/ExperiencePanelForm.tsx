@@ -25,6 +25,7 @@ const emptyJob = (): ExperienceJob => ({
     highlights: [],
     mark: "",
     markColor: "#818cf8",
+    iconUrl: "",
 })
 
 type ExperiencePanelFormProps = {
@@ -52,11 +53,31 @@ export function ExperiencePanelForm({
     })
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [uploadingIndex, setUploadingIndex] = useState<number | null>(null)
 
     const updateJob = (index: number, patch: Partial<ExperienceJob>) => {
         setJobs((prev) =>
             prev.map((job, i) => (i === index ? { ...job, ...patch } : job))
         )
+    }
+
+    const uploadIcon = async (index: number, file: File) => {
+        setUploadingIndex(index)
+        setError(null)
+        try {
+            const body = new FormData()
+            body.append("file", file)
+            const res = await fetch("/api/upload", { method: "POST", body })
+            const data = await res.json()
+            if (!res.ok || !data.success || !data.imageUrl) {
+                throw new Error(data.error || "Upload failed")
+            }
+            updateJob(index, { iconUrl: data.imageUrl as string })
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Icon upload failed")
+        } finally {
+            setUploadingIndex(null)
+        }
     }
 
     const handleKindChange = (next: "feature" | "stack") => {
@@ -102,6 +123,7 @@ export function ExperiencePanelForm({
                         .filter(Boolean),
                     mark: j.mark.trim() || j.org.slice(0, 2).toUpperCase(),
                     markColor: j.markColor || "#818cf8",
+                    iconUrl: j.iconUrl?.trim() || undefined,
                 })),
             })
         } catch (err) {
@@ -255,7 +277,7 @@ export function ExperiencePanelForm({
                         </label>
                         <label className="block">
                             <span className="mb-1.5 block text-sm text-gray-400">
-                                Mark (2 letters)
+                                Mark (fallback initials)
                             </span>
                             <input
                                 value={job.mark}
@@ -279,6 +301,68 @@ export function ExperiencePanelForm({
                                 className="h-10 w-full cursor-pointer rounded-lg border border-gray-700 bg-gray-950"
                             />
                         </label>
+                        <div className="sm:col-span-2 space-y-2">
+                            <span className="mb-1.5 block text-sm text-gray-400">
+                                Icon / logo (optional — replaces mark)
+                            </span>
+                            <div className="flex flex-wrap items-center gap-3">
+                                {job.iconUrl ? (
+                                    <span className="relative flex h-12 w-12 overflow-hidden rounded-lg border border-gray-700 bg-gray-950">
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                            src={job.iconUrl}
+                                            alt=""
+                                            className="h-full w-full object-contain p-1"
+                                        />
+                                    </span>
+                                ) : (
+                                    <span
+                                        className="flex h-12 w-12 items-center justify-center rounded-lg text-sm font-bold text-[#0c0a1a]"
+                                        style={{
+                                            backgroundColor:
+                                                job.markColor || "#818cf8",
+                                        }}
+                                    >
+                                        {job.mark || "?"}
+                                    </span>
+                                )}
+                                <label className="cursor-pointer rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-sm text-gray-200 hover:bg-gray-900">
+                                    {uploadingIndex === index
+                                        ? "Uploading…"
+                                        : "Upload icon"}
+                                    <input
+                                        type="file"
+                                        accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif"
+                                        className="hidden"
+                                        disabled={uploadingIndex === index}
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0]
+                                            if (file) void uploadIcon(index, file)
+                                            e.target.value = ""
+                                        }}
+                                    />
+                                </label>
+                                {job.iconUrl && (
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            updateJob(index, { iconUrl: "" })
+                                        }
+                                        className="text-sm text-red-300 hover:text-red-200"
+                                    >
+                                        Remove
+                                    </button>
+                                )}
+                            </div>
+                            <input
+                                value={job.iconUrl ?? ""}
+                                onChange={(e) =>
+                                    updateJob(index, { iconUrl: e.target.value })
+                                }
+                                className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-sm text-white"
+                                placeholder="Or paste image URL…"
+                            />
+                        </div>
                     </div>
                 </div>
             ))}

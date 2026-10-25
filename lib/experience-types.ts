@@ -13,8 +13,11 @@ export type ExperienceJob = {
     location?: string
     summary?: string
     highlights?: string[]
+    /** Fallback initials when no iconUrl */
     mark: string
     markColor: string
+    /** Optional logo/icon image URL (upload or external) */
+    iconUrl?: string
 }
 
 export type ExperiencePanelKind = "feature" | "stack"

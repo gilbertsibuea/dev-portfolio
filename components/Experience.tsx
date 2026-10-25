@@ -63,15 +63,113 @@ function mapApiPanels(panels: ExperiencePanel[]): Panel[] {
     return mapped
 }
 
-function Mark({ mark, color }: { mark: string; color: string }) {
+function Mark({
+    mark,
+    color,
+    iconUrl,
+    size = "md",
+}: {
+    mark: string
+    color: string
+    iconUrl?: string
+    size?: "sm" | "md"
+}) {
+    const box =
+        size === "sm"
+            ? "h-9 w-9 sm:h-9 sm:w-9"
+            : "h-9 w-9 sm:h-10 sm:w-10"
+
+    if (iconUrl) {
+        return (
+            <span
+                className={`relative flex ${box} shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/5`}
+                aria-hidden
+            >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    src={iconUrl}
+                    alt=""
+                    className="h-full w-full object-contain p-1"
+                />
+            </span>
+        )
+    }
+
     return (
         <span
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold tracking-tight text-[#0c0a1a] sm:h-10 sm:w-10"
+            className={`flex ${box} shrink-0 items-center justify-center rounded-lg text-sm font-bold tracking-tight text-[#0c0a1a]`}
             style={{ backgroundColor: color }}
             aria-hidden
         >
             {mark}
         </span>
+    )
+}
+
+type StripePlacement =
+    | "bottom-right"
+    | "bottom-left"
+    | "top-right"
+    | "top-left"
+    | "mid-right"
+    | "mid-left"
+
+const STRIPE_PLACEMENTS: StripePlacement[] = [
+    "bottom-right",
+    "top-left",
+    "mid-right",
+    "bottom-left",
+    "top-right",
+    "mid-left",
+]
+
+function hashSeed(input: string) {
+    let h = 0
+    for (let i = 0; i < input.length; i++) {
+        h = (h * 31 + input.charCodeAt(i)) | 0
+    }
+    return Math.abs(h)
+}
+
+function stripeForJob(job: Job): StripePlacement {
+    const seed = hashSeed(`${job.org}|${job.role}|${job.period}|${job.mark}`)
+    return STRIPE_PLACEMENTS[seed % STRIPE_PLACEMENTS.length]
+}
+
+const STRIPE_POS: Record<StripePlacement, string> = {
+    "bottom-right": "-bottom-10 -right-6",
+    "bottom-left": "-bottom-10 -left-6",
+    "top-right": "-top-10 -right-6",
+    "top-left": "-top-10 -left-6",
+    "mid-right": "top-1/2 -right-8 -translate-y-1/2",
+    "mid-left": "top-1/2 -left-8 -translate-y-1/2",
+}
+
+const STRIPE_ANGLE: Record<StripePlacement, string> = {
+    "bottom-right": "-35deg",
+    "bottom-left": "35deg",
+    "top-right": "35deg",
+    "top-left": "-35deg",
+    "mid-right": "-55deg",
+    "mid-left": "55deg",
+}
+
+/** Stripe decoration — placement varies per job so cards don’t feel identical */
+function CardStripe({
+    color,
+    placement,
+}: {
+    color: string
+    placement: StripePlacement
+}) {
+    return (
+        <div
+            aria-hidden
+            className={`pointer-events-none absolute h-44 w-44 opacity-[0.12] ${STRIPE_POS[placement]}`}
+            style={{
+                backgroundImage: `repeating-linear-gradient(${STRIPE_ANGLE[placement]}, ${color} 0 10px, transparent 10px 22px)`,
+            }}
+        />
     )
 }
 
@@ -105,16 +203,14 @@ function Meta({ period, location }: { period: string; location?: string }) {
 function FeatureCard({ job }: { job: Job }) {
     return (
         <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1c1a36] p-5 sm:p-7">
-            <div
-                aria-hidden
-                className="pointer-events-none absolute -bottom-10 -right-6 h-44 w-44 opacity-[0.12]"
-                style={{
-                    backgroundImage: `repeating-linear-gradient(-35deg, ${job.markColor} 0 10px, transparent 10px 22px)`,
-                }}
-            />
+            <CardStripe color={job.markColor} placement={stripeForJob(job)} />
             <div className="relative z-10 flex min-h-0 flex-1 flex-col">
                 <div className="flex items-start gap-3">
-                    <Mark mark={job.mark} color={job.markColor} />
+                    <Mark
+                        mark={job.mark}
+                        color={job.markColor}
+                        iconUrl={job.iconUrl}
+                    />
                     <div className="min-w-0 flex-1">
                         <p className="text-[15px] font-semibold leading-snug text-white sm:text-lg">
                             {job.org}
@@ -150,16 +246,15 @@ function FeatureCard({ job }: { job: Job }) {
 function CompactCard({ job }: { job: Job }) {
     return (
         <article className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1c1a36] p-4 sm:p-5">
-            <div
-                aria-hidden
-                className="pointer-events-none absolute bottom-2 right-3 h-14 w-14 opacity-[0.16]"
-                style={{
-                    background: `radial-gradient(circle at 30% 30%, ${job.markColor}, transparent 65%)`,
-                }}
-            />
+            <CardStripe color={job.markColor} placement={stripeForJob(job)} />
             <div className="relative z-10">
                 <div className="flex items-start gap-3">
-                    <Mark mark={job.mark} color={job.markColor} />
+                    <Mark
+                        mark={job.mark}
+                        color={job.markColor}
+                        iconUrl={job.iconUrl}
+                        size="sm"
+                    />
                     <div className="min-w-0">
                         <p className="text-sm font-semibold leading-snug text-white">
                             {job.org}
