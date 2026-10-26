@@ -4,10 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { motion, useInView } from "framer-motion"
 import { RadialWheel, WHEEL_INNER_R, WHEEL_OUTER_R } from "./stack/RadialWheel"
 import { SkillDetailsPanel } from "./stack/SkillDetailsPanel"
-import {
-    ACTIVATION_KEY_LABEL,
-    SKILL_CATEGORIES,
-} from "./stack/skillCategories"
+import { SKILL_CATEGORIES } from "./stack/skillCategories"
 import { useRadialMenu } from "./stack/useRadialMenu"
 
 function usePrefersReducedMotion() {
@@ -61,12 +58,8 @@ export const Stack = () => {
                         Skills wheel
                     </h2>
                     <p className="mt-3 text-sm text-white/50 sm:text-base">
-                        Hold the orb (or{" "}
-                        <kbd className="rounded border border-white/15 bg-white/5 px-1.5 py-0.5 font-mono text-[11px] text-violet-200">
-                            {ACTIVATION_KEY_LABEL}
-                        </kbd>
-                        ) to open categories, aim, then release to select. Esc
-                        cancels.
+                        Explore the categories that shape how I build. Pick one
+                        to see the tools and focus behind it.
                     </p>
                 </motion.div>
 
@@ -78,7 +71,7 @@ export const Stack = () => {
                         delay: 0.08,
                         ease: [0.25, 0.46, 0.45, 0.94],
                     }}
-                    className="mt-8 grid grid-cols-1 items-start gap-6 sm:mt-10 sm:gap-8 lg:mt-14 lg:grid-cols-12 lg:items-center lg:gap-10"
+                    className="mt-8 grid grid-cols-1 items-center gap-8 sm:mt-10 sm:gap-10 lg:mt-14 lg:grid-cols-12 lg:gap-10"
                 >
                     <div className="flex justify-center lg:col-span-6">
                         <RadialWheel
@@ -98,11 +91,27 @@ export const Stack = () => {
 
                     <div className="lg:col-span-6">
                         {previewCategory && (
-                            <div className="rounded-2xl border border-white/10 bg-[#1a1832]/80 p-5 sm:p-7">
-                                <SkillDetailsPanel
-                                    category={previewCategory}
-                                    reducedMotion={reducedMotion}
-                                />
+                            <div
+                                className={
+                                    reducedMotion
+                                        ? undefined
+                                        : "stack-float-card"
+                                }
+                            >
+                                <div
+                                    className={`rounded-2xl border bg-[#1a1832]/90 p-5 shadow-[0_22px_55px_-20px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-md transition-[border-color] duration-300 sm:p-7 ${
+                                        menu.isPreview
+                                            ? "border-violet-400/40"
+                                            : "border-white/10"
+                                    }`}
+                                >
+                                    <SkillDetailsPanel
+                                        category={previewCategory}
+                                        reducedMotion={reducedMotion}
+                                        isPreview={menu.isPreview}
+                                        sectorsOpen={menu.sectorsOpen}
+                                    />
+                                </div>
                             </div>
                         )}
                     </div>

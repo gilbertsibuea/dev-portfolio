@@ -70,3 +70,27 @@ body {
 .scrollbar-modern::-webkit-scrollbar-thumb:hover {
   background: rgba(167, 139, 250, 0.7);
 }
+
+/* Soft float for Stack detail card — CSS keeps it smooth across re-renders */
+@keyframes stack-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -8px, 0);
+  }
+}
+
+.stack-float-card {
+  animation: stack-float 6.5s cubic-bezier(0.37, 0, 0.63, 1) infinite;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stack-float-card {
+    animation: none;
+  }
+}
