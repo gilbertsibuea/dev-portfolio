@@ -44,6 +44,29 @@ export const Stack = () => {
             id="stack"
             className="relative z-10 -mt-4 overflow-hidden rounded-t-3xl bg-[#1F1F1F] text-white py-20 sm:-mt-6 md:-mt-8 md:py-28"
         >
+            {/* Soft grain texture — subtle, not material-literal */}
+            <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-[0.35] mix-blend-overlay"
+                style={{
+                    backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(
+                        `<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'>
+                          <filter id='n'>
+                            <feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/>
+                            <feColorMatrix values='0 0 0 0 0.85  0 0 0 0 0.85  0 0 0 0 0.9  0 0 0 0.55 0'/>
+                          </filter>
+                          <rect width='100%' height='100%' filter='url(#n)'/>
+                        </svg>`
+                    )}")`,
+                    backgroundRepeat: "repeat",
+                    backgroundSize: "160px 160px",
+                }}
+            />
+            <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(139,92,246,0.07),transparent_55%)]"
+            />
+
             <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
                 <motion.div
                     initial={{ opacity: 0, y: 22 }}

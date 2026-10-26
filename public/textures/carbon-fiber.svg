@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="fiberA" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3a3a3c"/>
+      <stop offset="35%" stop-color="#1c1c1e"/>
+      <stop offset="65%" stop-color="#2e2e30"/>
+      <stop offset="100%" stop-color="#121214"/>
+    </linearGradient>
+    <linearGradient id="fiberB" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a2a2c"/>
+      <stop offset="40%" stop-color="#101012"/>
+      <stop offset="70%" stop-color="#262628"/>
+      <stop offset="100%" stop-color="#18181a"/>
+    </linearGradient>
+    <pattern id="twill" width="16" height="16" patternUnits="userSpaceOnUse">
+      <!-- checker base -->
+      <rect width="8" height="8" fill="url(#fiberA)"/>
+      <rect x="8" y="8" width="8" height="8" fill="url(#fiberA)"/>
+      <rect x="8" y="0" width="8" height="8" fill="url(#fiberB)"/>
+      <rect x="0" y="8" width="8" height="8" fill="url(#fiberB)"/>
+      <!-- strand lines -->
+      <g stroke-linecap="square" opacity="0.85">
+        <path d="M0 2h8M0 5h8M8 10h8M8 13h8" stroke="#0a0a0a" stroke-width="0.7"/>
+        <path d="M0 1.2h8M0 4.2h8M8 9.2h8M8 12.2h8" stroke="#4a4a4e" stroke-width="0.35" opacity="0.5"/>
+        <path d="M10 0v8M13 0v8M2 8v8M5 8v8" stroke="#0a0a0a" stroke-width="0.7"/>
+        <path d="M9.2 0v8M12.2 0v8M1.2 8v8M4.2 8v8" stroke="#4a4a4e" stroke-width="0.35" opacity="0.5"/>
+      </g>
+    </pattern>
+  </defs>
+  <rect width="64" height="64" fill="#141416"/>
+  <rect width="64" height="64" fill="url(#twill)"/>
+</svg>
