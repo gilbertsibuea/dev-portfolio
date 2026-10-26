@@ -30,6 +30,7 @@ const TAG_STYLE: Record<JobTag, string> = {
     "Full Time": "bg-sky-500/20 text-sky-300 border-sky-400/30",
     Contract: "bg-amber-500/20 text-amber-200 border-amber-400/30",
     Freelance: "bg-emerald-500/20 text-emerald-300 border-emerald-400/30",
+    Internship: "bg-orange-500/20 text-orange-200 border-orange-400/30",
     Project: "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-400/30",
     Education: "bg-teal-500/20 text-teal-300 border-teal-400/30",
 }

@@ -2,6 +2,7 @@ export type ExperienceJobTag =
     | "Full Time"
     | "Contract"
     | "Freelance"
+    | "Internship"
     | "Project"
     | "Education"
 
