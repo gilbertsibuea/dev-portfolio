@@ -73,9 +73,7 @@ export const KeyMetrics = () => {
 
                     {/* Copy */}
                     <motion.div variants={fadeUp} className="lg:col-span-7 lg:pt-2">
-                        <p className="text-xs uppercase tracking-[0.22em] text-violet-300/70 mb-4">
-                            About
-                        </p>
+                      
                         <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-[1.15]">
                             Hey, I&apos;m Gilbert.
                             <span className="block text-white/45 font-semibold mt-2 text-xl sm:text-2xl md:text-3xl">
@@ -121,7 +119,7 @@ export const KeyMetrics = () => {
                                 <dt className="text-white/35 font-mono text-xs uppercase tracking-wider">
                                     Focus
                                 </dt>
-                                <dd className="mt-1 text-white/85">Fullstack Developing</dd>
+                                <dd className="mt-1 text-white/85">Software Engineering</dd>
                             </div>
                            
                             <div>

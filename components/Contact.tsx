@@ -43,9 +43,7 @@ export const Contact = () => {
                     transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
                     className="max-w-3xl"
                 >
-                    <p className="text-xs uppercase tracking-[0.22em] text-violet-300/70 mb-5">
-                        Contact
-                    </p>
+                   
                     <h2 className="font-bold tracking-tight text-white leading-[0.95] text-5xl sm:text-6xl md:text-7xl lg:text-8xl">
                         Let&apos;s work
                         <span className="block text-white/40">together</span>

@@ -1,9 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useMemo } from "react"
-import Link from "next/link"
 import { motion } from "framer-motion"
-import { FiArrowUpRight } from "react-icons/fi"
 import type { Project } from "./types"
 import { fadeInUp } from "./constants"
 import { getValidImageSrc } from "./utils"
@@ -203,7 +201,8 @@ export function Portfolio() {
                     </motion.div>
                 </div>
 
-                <motion.div
+                {/* Full projects page temporarily hidden — restore link to /projects when ready */}
+                {/* <motion.div
                     className="mt-6 md:mt-16"
                     variants={fadeInUp}
                     initial="hidden"
@@ -218,7 +217,7 @@ export function Portfolio() {
                         </span>
                         <FiArrowUpRight className="text-lg transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </Link>
-                </motion.div>
+                </motion.div> */}
             </div>
 
             {selectedProject && (

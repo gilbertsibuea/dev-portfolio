@@ -294,9 +294,7 @@ export const Services = () => {
                     transition={{ duration: 0.5 }}
                     className="mb-10 md:mb-14"
                 >
-                    <p className="text-xs uppercase tracking-[0.22em] text-violet-300/70 mb-4">
-                        Process
-                    </p>
+                  
                     <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-gray-200">
                         How I work
                     </h2>
