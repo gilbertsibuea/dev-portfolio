@@ -18,7 +18,9 @@ async function getProjects() {
 }
 
 export default async function ProjectsPageFull() {
-    const projects = await getProjects()
+    const projects = (await getProjects()).filter(
+        (p): p is typeof p & { id: number } => typeof p.id === 'number'
+    )
     const isDev = process.env.NODE_ENV === 'development'
 
     return (
