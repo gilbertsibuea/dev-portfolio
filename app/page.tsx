@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
+import { SideRails } from "@/components/SideRails";
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights} from '@vercel/speed-insights/next';
 import type { Metadata } from 'next';
@@ -49,6 +50,7 @@ export default function Home() {
   return (
     <>
       <Navbar />
+      <SideRails />
       <Hero />
       <Stack />
       <LogoAnimation />

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { FiArrowRight, FiMail, FiRefreshCw } from "react-icons/fi"
+import { SiThreads } from "react-icons/si"
 import { usePreloader } from "./PreloaderContext"
 
 type FloatingDraggableTextProps = {
@@ -433,6 +434,13 @@ export const Hero = () => {
                                     viewBox: "0 0 448 512"
                                 },
                                 {
+                                    href: "https://www.threads.net/@gilberths__",
+                                    label: "Threads",
+                                    color: "#FFFFFF",
+                                    rotate: 8,
+                                    Icon: SiThreads,
+                                },
+                                {
                                     href: "https://instagram.com/gilberths__",
                                     label: "Instagram",
                                     color: "#CE84CF",
@@ -440,7 +448,6 @@ export const Hero = () => {
                                     rotate: -8,
                                     viewBox: "0 0 1024 1024"
                                 },
-                               
                             ].map((social) => (
                                 <motion.li
                                     key={social.label}
@@ -461,17 +468,21 @@ export const Hero = () => {
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
-                                        <svg
-                                            stroke="currentColor"
-                                            fill="currentColor"
-                                            strokeWidth="0"
-                                            viewBox={social.viewBox}
-                                            height="28"
-                                            width="28"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                            <path d={social.icon} />
-                                        </svg>
+                                        {"Icon" in social && social.Icon ? (
+                                            <social.Icon size={26} />
+                                        ) : (
+                                            <svg
+                                                stroke="currentColor"
+                                                fill="currentColor"
+                                                strokeWidth="0"
+                                                viewBox={"viewBox" in social ? social.viewBox : "0 0 24 24"}
+                                                height="28"
+                                                width="28"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                                <path d={"icon" in social ? social.icon : ""} />
+                                            </svg>
+                                        )}
                                     </motion.a>
                                 </motion.li>
                             ))}
