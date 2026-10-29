@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import { FaWhatsapp, FaLinkedin } from "react-icons/fa"
 import { FiArrowUpRight, FiMail } from "react-icons/fi"
 import { SpotifyNowPlaying } from "./SpotifyNowPlaying"
+import { SectionMark } from "./SectionMark"
 
 const channels = [
     {
@@ -35,6 +36,7 @@ export const Contact = () => {
             id="contact"
             className="relative overflow-hidden bg-[#1F1F1F] text-white py-20 md:py-28 rounded-t-3xl"
         >
+            <SectionMark mode="rings" placement="top-left" />
             <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
                 <motion.div
                     initial={{ opacity: 0, y: 24 }}

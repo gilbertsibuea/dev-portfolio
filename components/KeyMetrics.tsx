@@ -6,6 +6,7 @@ import { motion, useInView } from "framer-motion"
 import { FaLinkedin } from "react-icons/fa"
 import { FiArrowUpRight, FiMapPin } from "react-icons/fi"
 import GitHubContributions from "./GitHubContributions"
+import { SectionMark } from "./SectionMark"
 
 const LINKEDIN_URL =
     "https://www.linkedin.com/in/gilbertsibuea/"
@@ -37,6 +38,7 @@ export const KeyMetrics = () => {
             className="relative z-10 -mt-4 overflow-hidden rounded-t-3xl bg-[#0f0e1a] text-white px-4 py-16 sm:-mt-6 md:-mt-8 md:pb-8 md:pt-24"
         >
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(139,92,246,0.12),transparent_50%)]" />
+            <SectionMark mode="index" index={4} label="About" />
 
             <div className="relative z-10 max-w-6xl mx-auto">
                 <motion.div

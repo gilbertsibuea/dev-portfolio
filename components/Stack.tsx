@@ -6,6 +6,7 @@ import { RadialWheel, WHEEL_INNER_R, WHEEL_OUTER_R } from "./stack/RadialWheel"
 import { SkillDetailsPanel } from "./stack/SkillDetailsPanel"
 import { SKILL_CATEGORIES } from "./stack/skillCategories"
 import { useRadialMenu } from "./stack/useRadialMenu"
+import { SectionMark } from "./SectionMark"
 
 function usePrefersReducedMotion() {
     const [reduced, setReduced] = useState(false)
@@ -65,6 +66,10 @@ export const Stack = () => {
             <div
                 aria-hidden
                 className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(139,92,246,0.07),transparent_55%)]"
+            />
+            <SectionMark
+                mode="hatch"
+                placement={["top-right", "bottom-left"]}
             />
 
             <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
