@@ -111,7 +111,6 @@ function DraggableLetter({
                               duration: 2.8,
                               repeat: Infinity,
                               ease: "easeInOut",
-                              delay: 0.9,
                               repeatDelay: 0.45,
                           }
                         : RESET_SPRING
@@ -222,6 +221,18 @@ export const Hero = () => {
     /** After first manual drag, demo hint never returns */
     const [hasDraggedOnce, setHasDraggedOnce] = useState(false)
     const [resetToken, setResetToken] = useState(0)
+    /** Drag demo starts a few seconds after hero entry */
+    const [dragHintReady, setDragHintReady] = useState(false)
+
+    useEffect(() => {
+        if (!isPreloaderComplete || hasDraggedOnce) {
+            setDragHintReady(false)
+            return
+        }
+
+        const timer = window.setTimeout(() => setDragHintReady(true), 2800)
+        return () => window.clearTimeout(timer)
+    }, [isPreloaderComplete, hasDraggedOnce])
 
     const handleLetterMoved = () => {
         setHasDraggedOnce(true)
@@ -447,7 +458,7 @@ export const Hero = () => {
                             text="Gilbert Hasiholan Sibuea"
                             resetToken={resetToken}
                             onLetterMoved={handleLetterMoved}
-                            showDragHint={!hasDraggedOnce}
+                            showDragHint={dragHintReady && !hasDraggedOnce}
                             demoLetterIndex={0}
                             className="w-full max-w-3xl font-black leading-tight text-5xl sm:text-6xl md:text-7xl text-center mx-auto"
                             letterClassName="bg-gradient-to-br from-white to-gray-400 bg-clip-text text-transparent"
