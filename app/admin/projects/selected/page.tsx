@@ -1,8 +1,32 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Reorder, useDragControls } from 'framer-motion';
+import { MdDragIndicator } from 'react-icons/md';
+
+function getProjectCategory(project: Project): string {
+  return project.category?.trim() || 'Other';
+}
+
+/** Group while preserving first-seen category order and relative item order */
+function groupSelectedByCategory(projects: Project[]): {
+  categories: string[];
+  groups: Record<string, Project[]>;
+} {
+  const categories: string[] = [];
+  const groups: Record<string, Project[]> = {};
+  for (const project of projects) {
+    const cat = getProjectCategory(project);
+    if (!groups[cat]) {
+      groups[cat] = [];
+      categories.push(cat);
+    }
+    groups[cat].push(project);
+  }
+  return { categories, groups };
+}
 
 // Project type definition
 interface Project {
@@ -86,6 +110,84 @@ const isVideoFile = (url: string): boolean => {
   return url.includes('.webm') || url.includes('.mp4') || url.includes('.mov');
 };
 
+function SortableSelectedRow({
+  project,
+  index,
+  onRemove,
+}: {
+  project: Project;
+  index: number;
+  onRemove: () => void;
+}) {
+  const controls = useDragControls();
+  const imagePath = getValidImagePath(project.image);
+
+  return (
+    <Reorder.Item
+      value={project}
+      dragListener={false}
+      dragControls={controls}
+      className="flex items-center justify-between gap-3 bg-gray-800 p-4 rounded-lg touch-none"
+      whileDrag={{
+        scale: 1.02,
+        boxShadow: '0 12px 40px rgba(0,0,0,0.45)',
+        zIndex: 20,
+      }}
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <button
+          type="button"
+          aria-label={`Drag to reorder ${project.title}`}
+          onPointerDown={(e) => controls.start(e)}
+          className="shrink-0 cursor-grab active:cursor-grabbing rounded-md p-1.5 text-gray-400 hover:bg-gray-700 hover:text-white touch-none"
+        >
+          <MdDragIndicator className="text-xl" />
+        </button>
+        <span className="text-violet-500 font-bold w-6 shrink-0 tabular-nums">
+          {index + 1}
+        </span>
+        <div className="w-12 h-12 overflow-hidden rounded-md shrink-0">
+          {isVideoFile(imagePath) ? (
+            <video
+              src={imagePath}
+              className="w-full h-full object-cover"
+              autoPlay
+              loop
+              muted
+              playsInline
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          ) : (
+            <img
+              src={imagePath}
+              alt={project.title}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                if (!e.currentTarget.src.includes('proj1.gif')) {
+                  e.currentTarget.src = '/proj1.gif';
+                }
+              }}
+            />
+          )}
+        </div>
+        <div className="min-w-0">
+          <h3 className="font-medium truncate">{project.title}</h3>
+          <p className="text-sm text-gray-400">{project.year}</p>
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={onRemove}
+        className="shrink-0 text-red-400 hover:text-red-300 transition-colors"
+      >
+        Remove
+      </button>
+    </Reorder.Item>
+  );
+}
+
 export default function SelectedProjectsPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -96,6 +198,19 @@ export default function SelectedProjectsPage() {
   const [selectedProjects, setSelectedProjects] = useState<Project[]>([]);
   
   const router = useRouter();
+
+  const { categories: selectedCategories, groups: selectedGroups } = useMemo(
+    () => groupSelectedByCategory(selectedProjects),
+    [selectedProjects]
+  );
+
+  const reorderWithinCategory = (category: string, nextInCategory: Project[]) => {
+    setSelectedProjects((prev) => {
+      const { categories, groups } = groupSelectedByCategory(prev);
+      groups[category] = nextInCategory;
+      return categories.flatMap((cat) => groups[cat] ?? []);
+    });
+  };
 
   // Check authentication and load projects
   useEffect(() => {
@@ -147,8 +262,8 @@ export default function SelectedProjectsPage() {
   };
 
   // Remove a project from the selected list
-  const removeProject = (index: number) => {
-    setSelectedProjects(prevProjects => prevProjects.filter((_, i) => i !== index));
+  const removeProject = (id: number) => {
+    setSelectedProjects((prevProjects) => prevProjects.filter((p) => p.id !== id));
   };
 
   // Save selected projects to the database
@@ -186,14 +301,6 @@ export default function SelectedProjectsPage() {
       setTimeout(() => setSaveMessage(null), 3000);
     }
   };
-
-  // Helper to group projects by category
-  const groupedSelected = selectedProjects.reduce((acc, project) => {
-    const cat = project.category || "Other";
-    if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(project);
-    return acc;
-  }, {} as Record<string, Project[]>);
 
   if (isLoading) {
     return (
@@ -247,73 +354,40 @@ export default function SelectedProjectsPage() {
             <p className="text-gray-400 mb-2">
               Select projects to feature in your portfolio. {selectedProjects.length} selected.
             </p>
+            <p className="text-gray-500 text-sm mb-4">
+              Drag the handle to reorder within each category. Order is saved when you click Save Changes.
+            </p>
             {selectedProjects.length === 0 ? (
               <div className="py-8 text-center text-gray-500">
                 No projects selected.
               </div>
             ) : (
               <div>
-                {Object.entries(groupedSelected).map(([category, projects]) => (
-                  <div key={category} className="mb-6">
-                    <h3 className="text-lg font-bold mb-3 text-violet-400">{category}</h3>
-                    {projects.map((project, index) => (
-                      <div 
-                        key={project.id} 
-                        className="flex items-center justify-between bg-gray-800 p-4 rounded-lg mb-2"
+                {selectedCategories.map((category) => {
+                  const projects = selectedGroups[category] ?? [];
+                  return (
+                    <div key={category} className="mb-6 last:mb-0">
+                      <h3 className="text-lg font-bold mb-3 text-violet-400">
+                        {category}
+                      </h3>
+                      <Reorder.Group
+                        axis="y"
+                        values={projects}
+                        onReorder={(next) => reorderWithinCategory(category, next)}
+                        className="space-y-2"
                       >
-                        <div className="flex items-center space-x-3">
-                          <span className="text-violet-500 font-bold w-6">{index + 1}</span>
-                          <div className="w-12 h-12 overflow-hidden rounded-md">
-                            {isVideoFile(getValidImagePath(project.image)) ? (
-                              <video
-                                src={getValidImagePath(project.image)}
-                                className="w-full h-full object-cover"
-                                style={{ objectFit: 'cover' }}
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                                // onLoadedData={() => {
-                                //   console.log(`✅ Video loaded for ${project.title}:`, getValidImagePath(project.image));
-                                // }}
-                                onError={(e) => {
-                                  console.error(`❌ Video failed for ${project.title}:`, getValidImagePath(project.image));
-                                  // Optionally set a fallback here
-                                  e.currentTarget.style.display = 'none'; // Hide the video element
-                                }}
-                              />
-                            ) : (
-                              <img
-                                src={getValidImagePath(project.image)}
-                                alt={project.title}
-                                className="w-full h-full object-cover"
-                                style={{ objectFit: 'cover' }}
-                                // onLoad={() => {
-                                //   console.log(`✅ Image loaded for ${project.title}:`, getValidImagePath(project.image));
-                                // }}
-                                onError={(e) => {
-                                  if (!e.currentTarget.src.includes('proj1.gif')) {
-                                    e.currentTarget.src = '/proj1.gif';
-                                  }
-                                }}
-                              />
-                            )}
-                          </div>
-                          <div>
-                            <h3 className="font-medium">{project.title}</h3>
-                            <p className="text-sm text-gray-400">{project.year}</p>
-                          </div>
-                        </div>
-                        <button 
-                          onClick={() => removeProject(selectedProjects.findIndex(p => p.id === project.id))} 
-                          className="text-red-400 hover:text-red-300 transition-colors"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ))}
+                        {projects.map((project, index) => (
+                          <SortableSelectedRow
+                            key={project.id}
+                            project={project}
+                            index={index}
+                            onRemove={() => removeProject(project.id)}
+                          />
+                        ))}
+                      </Reorder.Group>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
