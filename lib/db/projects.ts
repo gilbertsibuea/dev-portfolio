@@ -231,7 +231,6 @@ export async function getSelectedProjects(): Promise<Project[]> {
       SELECT * FROM projects 
       WHERE selected = 1 
       ORDER BY selected_order ASC
-      LIMIT 3
     `);
     return result.rows.map((row) => rowToProject(row as unknown as ProjectRow));
   } catch (error) {

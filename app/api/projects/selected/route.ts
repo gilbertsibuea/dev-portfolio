@@ -29,7 +29,7 @@ export async function GET() {
   }
 }
 
-// POST endpoint to update selected projects (max 3)
+// POST endpoint to update selected projects (all categories: Web, Mobile, etc.)
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
@@ -42,17 +42,18 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Define interface for selected project
     interface SelectedProject {
       id: number;
-      [key: string]: unknown; // For any other properties that might be present
+      order?: number;
+      [key: string]: unknown;
     }
-    
-    // Limit to maximum 3 selected projects
-    const selectedProjects = data.selectedProjects.slice(0, 3).map((project: SelectedProject, index: number) => ({
-      id: project.id,
-      order: index + 1
-    }));
+
+    const selectedProjects = data.selectedProjects
+      .filter((project: SelectedProject) => typeof project?.id === 'number')
+      .map((project: SelectedProject, index: number) => ({
+        id: project.id,
+        order: typeof project.order === 'number' ? project.order : index + 1,
+      }));
     
     // Update selected projects in the database
     const result = await updateSelectedProjects(selectedProjects);
