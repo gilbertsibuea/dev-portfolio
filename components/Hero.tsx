@@ -1,17 +1,162 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence, animate, motion, useMotionValue } from "framer-motion"
 import { FiArrowRight, FiMail, FiRefreshCw } from "react-icons/fi"
 import { SiThreads } from "react-icons/si"
 import { usePreloader } from "./PreloaderContext"
+
+const RESET_SPRING = { type: "spring" as const, stiffness: 260, damping: 24, mass: 0.85 }
+
+/** Fake grabbing cursor that rides along the demo letter */
+function GrabbingCursor() {
+    return (
+        <span
+            className="pointer-events-none absolute left-1/2 top-[70%] z-50 -translate-x-1/2 animate-pulse"
+            aria-hidden
+        >
+            <svg
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                className="drop-shadow-[0_2px_5px_rgba(0,0,0,0.65)]"
+            >
+                <path
+                    fill="#fff"
+                    stroke="#1a1838"
+                    strokeWidth="1.25"
+                    strokeLinejoin="round"
+                    d="M8.2 11.2V7.1a1.15 1.15 0 0 1 2.3 0v2.6m0-1.4V5.6a1.15 1.15 0 0 1 2.3 0v4.2m0-1.5V5.3a1.15 1.15 0 1 1 2.3 0v4.8m0-1.2V6.6a1.15 1.15 0 1 1 2.3 0v6.1c0 2.7-1.7 5.1-4.7 5.1h-.6c-2.2 0-3.7-1-4.8-2.5L6.4 15a1.6 1.6 0 0 1 .2-2.2l.9-.8a1.3 1.3 0 0 1 1.7.1l.8.9v-1.8Z"
+                />
+            </svg>
+        </span>
+    )
+}
+
+function DraggableLetter({
+    char,
+    index,
+    letterClassName,
+    isDemo,
+    resetToken,
+    onLetterMoved,
+}: {
+    char: string
+    index: number
+    letterClassName: string
+    isDemo: boolean
+    resetToken: number
+    onLetterMoved?: () => void
+}) {
+    const x = useMotionValue(0)
+    const y = useMotionValue(0)
+    // Local dismiss so cursor/demo die instantly on drag (no parent lag / blink)
+    const [hintOn, setHintOn] = useState(isDemo)
+    const floatDuration = 5.5 + (index % 4) * 0.6
+    const floatDelay = (index % 6) * 0.2
+
+    useEffect(() => {
+        if (!isDemo) setHintOn(false)
+        else setHintOn(true)
+    }, [isDemo])
+
+    useEffect(() => {
+        if (resetToken === 0) return
+        const ax = animate(x, 0, RESET_SPRING)
+        const ay = animate(y, 0, RESET_SPRING)
+        return () => {
+            ax.stop()
+            ay.stop()
+        }
+    }, [resetToken, x, y])
+
+    const handleDragStart = () => {
+        setHintOn(false)
+        onLetterMoved?.()
+    }
+
+    return (
+        <motion.span
+            drag
+            dragMomentum={false}
+            dragElastic={0.12}
+            onDragStart={handleDragStart}
+            whileDrag={{
+                scale: 1.15,
+                zIndex: 60,
+                cursor: "grabbing",
+                filter: "drop-shadow(0 0 10px rgba(172, 158, 227, 0.5))",
+            }}
+            whileHover={hintOn ? undefined : { scale: 1.05 }}
+            className={`relative inline-block touch-none select-none leading-none ${
+                hintOn ? "cursor-grabbing" : "cursor-grab active:cursor-grabbing"
+            }`}
+            style={{ x, y, zIndex: hintOn ? 40 : 10 }}
+        >
+            <motion.span
+                className="relative inline-block"
+                animate={
+                    hintOn
+                        ? {
+                              x: [0, 26, 8, -20, 14, 0],
+                              y: [0, -28, -10, -34, -16, 0],
+                              scale: [1, 1.18, 1.12, 1.16, 1.1, 1],
+                              rotate: [0, 7, -3, 9, -2, 0],
+                          }
+                        : { x: 0, y: 0, scale: 1, rotate: 0 }
+                }
+                transition={
+                    hintOn
+                        ? {
+                              duration: 2.8,
+                              repeat: Infinity,
+                              ease: "easeInOut",
+                              delay: 0.9,
+                              repeatDelay: 0.45,
+                          }
+                        : RESET_SPRING
+                }
+                style={
+                    hintOn
+                        ? { filter: "drop-shadow(0 0 12px rgba(172, 158, 227, 0.55))" }
+                        : undefined
+                }
+            >
+                <motion.span
+                    className={`inline-block will-change-transform ${letterClassName}`}
+                    animate={
+                        hintOn
+                            ? { x: 0, y: 0, rotate: 0 }
+                            : {
+                                  y: [0, -3, -1.5, -3.5, 0],
+                                  x: [0, 0.8, 0, -0.8, 0],
+                                  rotate: [0, 0.4, 0, -0.4, 0],
+                              }
+                    }
+                    transition={{
+                        duration: floatDuration,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: floatDelay,
+                    }}
+                >
+                    {char}
+                </motion.span>
+                {hintOn ? <GrabbingCursor /> : null}
+            </motion.span>
+        </motion.span>
+    )
+}
 
 type FloatingDraggableTextProps = {
     text: string
     className?: string
     letterClassName?: string
-    resetKey?: number
+    resetToken?: number
     onLetterMoved?: () => void
+    /** Loop a pull-demo on one letter until the user drags once */
+    showDragHint?: boolean
+    demoLetterIndex?: number
 }
 
 /** Each letter floats gently and can be dragged. Words stay intact (no mid-word wrap). */
@@ -19,8 +164,10 @@ function FloatingDraggableText({
     text,
     className = "",
     letterClassName = "",
-    resetKey = 0,
+    resetToken = 0,
     onLetterMoved,
+    showDragHint = false,
+    demoLetterIndex = 0,
 }: FloatingDraggableTextProps) {
     const words = text.split(" ")
     let letterIndex = 0
@@ -44,49 +191,21 @@ function FloatingDraggableText({
         >
             {words.map((word, wordIndex) => (
                 <span
-                    key={`${word}-${wordIndex}-${resetKey}`}
+                    key={`${word}-${wordIndex}`}
                     className="inline-flex whitespace-nowrap items-baseline"
                 >
                     {word.split("").map((char) => {
                         const index = letterIndex++
-                        // Soft, slow drift — mostly vertical, tiny horizontal
-                        const floatDuration = 5.5 + (index % 4) * 0.6
-                        const floatDelay = (index % 6) * 0.2
-
                         return (
-                            <motion.span
-                                key={`${word}-${index}-${char}-${resetKey}`}
-                                drag
-                                dragMomentum={false}
-                                dragElastic={0.12}
-                                onDragStart={() => onLetterMoved?.()}
-                                whileDrag={{
-                                    scale: 1.15,
-                                    zIndex: 60,
-                                    cursor: "grabbing",
-                                    filter: "drop-shadow(0 0 10px rgba(172, 158, 227, 0.5))",
-                                }}
-                                whileHover={{ scale: 1.05 }}
-                                className="relative inline-block cursor-grab active:cursor-grabbing touch-none select-none leading-none"
-                                style={{ zIndex: 10 }}
-                            >
-                                <motion.span
-                                    className={`inline-block will-change-transform ${letterClassName}`}
-                                    animate={{
-                                        y: [0, -3, -1.5, -3.5, 0],
-                                        x: [0, 0.8, 0, -0.8, 0],
-                                        rotate: [0, 0.4, 0, -0.4, 0],
-                                    }}
-                                    transition={{
-                                        duration: floatDuration,
-                                        repeat: Infinity,
-                                        ease: "easeInOut",
-                                        delay: floatDelay,
-                                    }}
-                                >
-                                    {char}
-                                </motion.span>
-                            </motion.span>
+                            <DraggableLetter
+                                key={`${word}-${index}-${char}`}
+                                char={char}
+                                index={index}
+                                letterClassName={letterClassName}
+                                isDemo={showDragHint && index === demoLetterIndex}
+                                resetToken={resetToken}
+                                onLetterMoved={onLetterMoved}
+                            />
                         )
                     })}
                 </span>
@@ -98,16 +217,20 @@ function FloatingDraggableText({
 export const Hero = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const { isComplete: isPreloaderComplete } = usePreloader()
-    const [lettersMoved, setLettersMoved] = useState(false)
-    const [resetKey, setResetKey] = useState(0)
+    /** Letters are off their home positions — shows Reset */
+    const [lettersScattered, setLettersScattered] = useState(false)
+    /** After first manual drag, demo hint never returns */
+    const [hasDraggedOnce, setHasDraggedOnce] = useState(false)
+    const [resetToken, setResetToken] = useState(0)
 
     const handleLetterMoved = () => {
-        if (!lettersMoved) setLettersMoved(true)
+        setHasDraggedOnce(true)
+        setLettersScattered(true)
     }
 
     const handleResetLetters = () => {
-        setResetKey((key) => key + 1)
-        setLettersMoved(false)
+        setResetToken((token) => token + 1)
+        setLettersScattered(false)
     }
 
     useEffect(() => {
@@ -288,10 +411,11 @@ export const Hero = () => {
                 animate={isPreloaderComplete ? "visible" : "hidden"}
             >
                 <div className="relative w-full flex flex-col items-center">
-                    <div className="h-10 mb-2 flex items-center justify-center">
-                        <AnimatePresence>
-                            {lettersMoved && (
+                    <div className="mb-1 flex h-10 w-full items-center justify-center">
+                        <AnimatePresence mode="wait">
+                            {lettersScattered && (
                                 <motion.button
+                                    key="reset-letters"
                                     type="button"
                                     onClick={handleResetLetters}
                                     initial={{ opacity: 0, y: 8, scale: 0.9 }}
@@ -310,21 +434,25 @@ export const Hero = () => {
                         </AnimatePresence>
                     </div>
 
-                    <FloatingDraggableText
-                        text="Hi, I am"
-                        resetKey={resetKey}
-                        onLetterMoved={handleLetterMoved}
-                        className="text-5xl sm:text-6xl md:text-7xl font-black text-center"
-                        letterClassName="text-white/40"
-                    />
+                    <div className="relative w-full">
+                        <FloatingDraggableText
+                            text="Hi, I am"
+                            resetToken={resetToken}
+                            onLetterMoved={handleLetterMoved}
+                            className="text-5xl sm:text-6xl md:text-7xl font-black text-center"
+                            letterClassName="text-white/40"
+                        />
 
-                    <FloatingDraggableText
-                        text="Gilbert Hasiholan Sibuea"
-                        resetKey={resetKey}
-                        onLetterMoved={handleLetterMoved}
-                        className="w-full max-w-3xl font-black leading-tight text-5xl sm:text-6xl md:text-7xl text-center"
-                        letterClassName="bg-gradient-to-br from-white to-gray-400 bg-clip-text text-transparent"
-                    />
+                        <FloatingDraggableText
+                            text="Gilbert Hasiholan Sibuea"
+                            resetToken={resetToken}
+                            onLetterMoved={handleLetterMoved}
+                            showDragHint={!hasDraggedOnce}
+                            demoLetterIndex={0}
+                            className="w-full max-w-3xl font-black leading-tight text-5xl sm:text-6xl md:text-7xl text-center mx-auto"
+                            letterClassName="bg-gradient-to-br from-white to-gray-400 bg-clip-text text-transparent"
+                        />
+                    </div>
                 </div>
 
                 <motion.p 
