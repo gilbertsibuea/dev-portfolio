@@ -1,14 +1,14 @@
 import { MetadataRoute } from 'next'
+import { siteConfig } from '@/lib/metadata'
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = 'https://gilbertsibuea.com'
-  
   return {
     rules: {
       userAgent: '*',
       allow: '/',
       disallow: ['/admin/', '/api/'],
     },
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: `${siteConfig.url}/sitemap.xml`,
+    host: siteConfig.url,
   }
 }

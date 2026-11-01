@@ -1,22 +1,13 @@
 import { MetadataRoute } from 'next'
+import { siteConfig } from '@/lib/metadata'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://gilbertsibuea.com'
-
   return [
     {
-      url: baseUrl,
+      url: siteConfig.url,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 1,
     },
-    {
-      url: `${baseUrl}/projects`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-
-    // Add more pages as needed
   ]
 }

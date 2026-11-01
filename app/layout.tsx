@@ -3,6 +3,9 @@ import "./globals.css"
 import ClientWrapper from '@/components/ClientWrapper'
 import Providers from '@/components/Providers'
 import { siteConfig, personStructuredData, websiteStructuredData } from "@/lib/metadata"
+import { metadata as rootMetadata } from "./metadata"
+
+export const metadata = rootMetadata
 
 // Only load the 2 weights actually used across the site
 const poppins = Poppins({
@@ -22,14 +25,17 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/profile.png" />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#000000" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="theme-color" content="#0f0e1c" />
         <link rel="canonical" href={siteConfig.url} />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
+          rel="alternate"
+          href="https://gilbertsibuea.id"
+          hrefLang="x-default"
+        />
+        <link
+          rel="alternate"
+          href={siteConfig.url}
+          hrefLang="en"
         />
         <script
           type="application/ld+json"

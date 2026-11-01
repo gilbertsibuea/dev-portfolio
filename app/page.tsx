@@ -42,7 +42,7 @@ const Footer = dynamic(() => import("@/components/Footer").then(mod => ({ defaul
 
 export const metadata: Metadata = generateMetadata({
   title: "Gilbert Sibuea - Full Stack Developer Portfolio",
-  description: `Gilbert Hasiholan Sibuea — Full Stack Developer based in Bandar Lampung, Indonesia. Explore innovative web applications, mobile solutions, and software projects built with React, Next.js, Node.js, and more. Available for freelance projects and full-time opportunities. Visit gilbertsibuea.com.`,
+  description: `Gilbert Sibuea (Gilbert Hasiholan Sibuea) — Full Stack Developer based in Bandung / Bandar Lampung, Indonesia. Web & mobile projects with React, Next.js, Node.js. Available for freelance and full-time roles. Visit gilbertsibuea.id.`,
   url: siteConfig.url,
 });
 

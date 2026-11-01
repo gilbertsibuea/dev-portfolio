@@ -1,11 +1,11 @@
 {
-  "name": "Gilbert Hasiholan Sibuea - Full Stack Developer Portfolio",
-  "short_name": "Gilbert Portfolio",
-  "description": "Gilbert Hasiholan Sibuea's professional portfolio showcasing full stack development projects and expertise",
+  "name": "Gilbert Sibuea - Full Stack Developer",
+  "short_name": "Gilbert Sibuea",
+  "description": "Portfolio of Gilbert Sibuea (Gilbert Hasiholan Sibuea) — Full Stack Developer at gilbertsibuea.id",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#0f0e1c",
+  "theme_color": "#0f0e1c",
   "orientation": "portrait-primary",
   "icons": [
     {
@@ -23,5 +23,6 @@
   ],
   "categories": ["portfolio", "developer", "technology"],
   "lang": "en-US",
-  "dir": "ltr"
+  "dir": "ltr",
+  "id": "https://www.gilbertsibuea.id/"
 }

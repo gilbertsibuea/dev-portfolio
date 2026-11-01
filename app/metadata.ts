@@ -1,18 +1,19 @@
-import type { Metadata } from "next";
-import { siteConfig } from "@/lib/metadata";
+import type { Metadata } from "next"
+import { siteConfig } from "@/lib/metadata"
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
     default: siteConfig.title,
-    template: `%s | ${siteConfig.name}`
+    template: `%s | ${siteConfig.name}`,
   },
-  manifest: '/site.webmanifest',
+  manifest: '/manifest.json',
   description: siteConfig.description,
   keywords: siteConfig.keywords,
-  authors: [{ name: siteConfig.creator }],
+  authors: [{ name: siteConfig.creator, url: siteConfig.url }],
   creator: siteConfig.creator,
   publisher: siteConfig.creator,
+  applicationName: 'Gilbert Sibuea Portfolio',
   formatDetection: {
     email: false,
     address: false,
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
         url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: `Gilbert Sibuea - Full Stack Developer & Software Engineer`,
+        alt: 'Gilbert Sibuea - Full Stack Developer & Software Engineer',
       },
     ],
   },
@@ -60,16 +61,14 @@ export const metadata: Metadata = {
     google: 'c2dd06541e4a304b',
   },
   other: {
-    'author': 'Gilbert Sibuea',
-    'designer': 'Gilbert Sibuea',
-    'owner': 'Gilbert Sibuea',
-    'copyright': 'Gilbert Sibuea',
-    'reply-to': 'contact@gilbertsibuea.com',
-    'language': 'en',
-    'revisit-after': '7 days',
-    'category': 'Portfolio, Web Development, Software Engineering',
-    'classification': 'Personal Portfolio',
-    'HandheldFriendly': 'True',
-    'MobileOptimized': '320',
+    author: 'Gilbert Sibuea',
+    designer: 'Gilbert Sibuea',
+    owner: 'Gilbert Sibuea',
+    copyright: 'Gilbert Sibuea',
+    'reply-to': 'gilbertsibuea8539@gmail.com',
+    language: 'en',
+    'revisit-after': '3 days',
+    category: 'Portfolio, Web Development, Software Engineering',
+    classification: 'Personal Portfolio',
   },
-};
+}
