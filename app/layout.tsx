@@ -22,8 +22,25 @@ export default function RootLayout({
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/profile.png" />
+        {/* Google needs a square PNG ≥48px; 16x16 .ico alone is often ignored */}
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="192x192"
+          href="/android-chrome-192x192.png"
+        />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#0f0e1c" />
         <link rel="canonical" href={siteConfig.url} />
