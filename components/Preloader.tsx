@@ -125,7 +125,7 @@ const Preloader = ({ onLoadComplete }: PreloaderProps) => {
           {/* Info pojok */}
           <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-6 sm:p-10">
             <span className="text-[11px] uppercase tracking-[0.3em] text-white/40">
-              Gilbert's Portfolio
+              Gilbert&apos;s Portfolio
             </span>
             <span
               ref={counterRef}
