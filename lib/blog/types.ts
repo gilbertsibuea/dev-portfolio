@@ -1,6 +1,8 @@
 import type { BlogCategory } from "./categories"
+import type { BlogLangCode } from "./languages"
 
-export type BlogLang = "en" | "id"
+/** Alias of the language registry — extend via `lib/blog/languages.ts` */
+export type BlogLang = BlogLangCode
 export type BlogStatus = "draft" | "published"
 
 export type BlogPost = {

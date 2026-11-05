@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react"
 import { BLOG_CATEGORIES, type BlogCategory } from "@/lib/blog/categories"
+import { BLOG_LANGUAGES } from "@/lib/blog/languages"
 import { estimateReadingMinutes } from "@/lib/blog/format"
 import { normalizeBlogMarkdown } from "@/lib/blog/normalizeMarkdown"
 import type { BlogLang, BlogPost } from "@/lib/blog/types"
@@ -215,8 +216,11 @@ export function BlogPostForm({
                 onChange={(e) => setSourceLang(e.target.value as BlogLang)}
                 className="w-full rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-white"
               >
-                <option value="en">English</option>
-                <option value="id">Bahasa Indonesia</option>
+                {BLOG_LANGUAGES.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.label}
+                  </option>
+                ))}
               </select>
               <p className="mt-1 text-xs text-gray-500">
                 On publish, the other language is generated via DeepL.

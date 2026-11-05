@@ -8,6 +8,7 @@ import {
   displayTitle,
   estimateReadingMinutes,
 } from "@/lib/blog/format"
+import { BLOG_LANGUAGES } from "@/lib/blog/languages"
 import type { BlogLang, BlogPostListItem } from "@/lib/blog/types"
 import { BlogCategoryTabs } from "./BlogCategoryTabs"
 import { LangToggle } from "./LangToggle"
@@ -34,7 +35,7 @@ export function BlogIndex({ posts, category, initialLang }: Props) {
           </h1>
           <LangToggle
             lang={lang}
-            available={["en", "id"]}
+            available={BLOG_LANGUAGES.map((l) => l.code)}
             onChange={(next) => {
               setLang(next)
               router.refresh()

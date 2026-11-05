@@ -1,6 +1,7 @@
 import { cookies } from "next/headers"
 import { createHash, randomBytes, timingSafeEqual } from "crypto"
 import type { NextResponse } from "next/server"
+import { isBlogLangCode } from "./languages"
 import type { BlogLang } from "./types"
 
 export const VOTER_COOKIE = "voter_id"
@@ -70,8 +71,8 @@ export function attachVoterCookie(
 export function parseBlogLang(
   value: string | undefined | null
 ): BlogLang | null {
-  if (value === "en" || value === "id") return value
-  return null
+  if (!value) return null
+  return isBlogLangCode(value) ? value : null
 }
 
 export async function getBlogLangCookie(): Promise<BlogLang | null> {

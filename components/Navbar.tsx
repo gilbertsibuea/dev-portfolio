@@ -20,7 +20,9 @@ import {
     FiHome,
     FiLayers,
     FiMail,
+    FiMenu,
     FiUser,
+    FiX,
 } from "react-icons/fi"
 
 type NavItem = {
@@ -82,7 +84,6 @@ function useActiveSection(enabled: boolean): string {
                 }
             }
 
-            // Short last section may never reach the marker
             const atBottom =
                 window.innerHeight + window.scrollY >=
                 document.documentElement.scrollHeight - 4
@@ -122,6 +123,11 @@ function useCanHover(): boolean {
     return canHover
 }
 
+function hrefFor(item: NavItem, onHome: boolean) {
+    if (item.path.startsWith("#") && !onHome) return `/${item.path}`
+    return item.path
+}
+
 export const Navbar = () => {
     const pathname = usePathname()
     const router = useRouter()
@@ -132,12 +138,12 @@ export const Navbar = () => {
 
     const [hovered, setHovered] = useState(false)
     const [keyboardFocus, setKeyboardFocus] = useState(false)
-    const [tapOpen, setTapOpen] = useState(false)
     const [slot, setSlot] = useState<HoverSlot | null>(null)
+    const [mobileOpen, setMobileOpen] = useState(false)
 
     const navRef = useRef<HTMLElement>(null)
+    const mobileMenuRef = useRef<HTMLDivElement>(null)
     const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-    const tapOpenScrollY = useRef(0)
 
     const { scrollYProgress } = useScroll()
     const progress = useSpring(scrollYProgress, {
@@ -146,28 +152,10 @@ export const Navbar = () => {
         restDelta: 0.001,
     })
 
-    // Fully open while in the Home area; island once a section takes over
+    // Fully open while in the Home area; island once a section takes over (desktop only)
     const expanded =
-        !onHome || active === "hero" || hovered || keyboardFocus || tapOpen
+        !onHome || active === "hero" || hovered || keyboardFocus
     const island = (spring: Transition) => (reduceMotion ? { duration: 0 } : spring)
-
-    useEffect(() => {
-        if (!tapOpen) return
-        const onScroll = () => {
-            if (Math.abs(window.scrollY - tapOpenScrollY.current) > 48) setTapOpen(false)
-        }
-        const onPointerDown = (event: PointerEvent) => {
-            if (navRef.current && !navRef.current.contains(event.target as Node)) {
-                setTapOpen(false)
-            }
-        }
-        window.addEventListener("scroll", onScroll, { passive: true })
-        document.addEventListener("pointerdown", onPointerDown)
-        return () => {
-            window.removeEventListener("scroll", onScroll)
-            document.removeEventListener("pointerdown", onPointerDown)
-        }
-    }, [tapOpen])
 
     useEffect(() => {
         return () => {
@@ -178,6 +166,34 @@ export const Navbar = () => {
     useEffect(() => {
         if (!expanded) setSlot(null)
     }, [expanded])
+
+    useEffect(() => {
+        setMobileOpen(false)
+    }, [pathname])
+
+    useEffect(() => {
+        if (!mobileOpen) return
+        const onPointerDown = (event: PointerEvent) => {
+            if (
+                mobileMenuRef.current &&
+                !mobileMenuRef.current.contains(event.target as Node)
+            ) {
+                setMobileOpen(false)
+            }
+        }
+        const onKey = (event: KeyboardEvent) => {
+            if (event.key === "Escape") setMobileOpen(false)
+        }
+        document.addEventListener("pointerdown", onPointerDown)
+        document.addEventListener("keydown", onKey)
+        const prev = document.body.style.overflow
+        document.body.style.overflow = "hidden"
+        return () => {
+            document.removeEventListener("pointerdown", onPointerDown)
+            document.removeEventListener("keydown", onKey)
+            document.body.style.overflow = prev
+        }
+    }, [mobileOpen])
 
     const handleMouseEnter = () => {
         if (!canHover) return
@@ -215,32 +231,44 @@ export const Navbar = () => {
         setSlot({ id, x: el.offsetLeft, width: el.offsetWidth })
     }
 
-    const handleItemClick = useCallback(
-        (event: React.MouseEvent<HTMLAnchorElement>, item: NavItem) => {
-            // Touch: first tap on the island opens it instead of navigating
-            if (!expanded) {
-                event.preventDefault()
-                tapOpenScrollY.current = window.scrollY
-                setTapOpen(true)
-                navigator.vibrate?.(8)
-                return
-            }
+    const navigateToItem = useCallback(
+        (item: NavItem) => {
+            setMobileOpen(false)
+            if (!item.path.startsWith("#")) return false
 
-            setTapOpen(false)
-            if (!item.path.startsWith("#")) return
-
-            event.preventDefault()
             if (!onHome) {
                 router.push(`/${item.path}`)
-                return
+                return true
             }
             document.getElementById(item.id)?.scrollIntoView({
                 behavior: reduceMotion ? "auto" : "smooth",
                 block: "start",
             })
+            return true
         },
-        [expanded, onHome, reduceMotion, router]
+        [onHome, reduceMotion, router]
     )
+
+    const handleDesktopClick = useCallback(
+        (event: React.MouseEvent<HTMLAnchorElement>, item: NavItem) => {
+            if (!item.path.startsWith("#")) return
+            event.preventDefault()
+            navigateToItem(item)
+        },
+        [navigateToItem]
+    )
+
+    const handleMobileClick = (
+        event: React.MouseEvent<HTMLAnchorElement>,
+        item: NavItem
+    ) => {
+        if (!item.path.startsWith("#")) {
+            setMobileOpen(false)
+            return
+        }
+        event.preventDefault()
+        navigateToItem(item)
+    }
 
     const visibleItems = expanded
         ? NAV_ITEMS
@@ -249,171 +277,248 @@ export const Navbar = () => {
     const showTooltip = expanded && slotItem && (canHover || keyboardFocus)
 
     return (
-        <div className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-4 md:pt-6">
-            <LayoutGroup>
-                <motion.nav
-                    ref={navRef}
-                    layout
-                    aria-label="Primary"
-                    transition={island(islandSpring)}
-                    style={{ borderRadius: RADIUS }}
-                    onMouseEnter={handleMouseEnter}
-                    onMouseLeave={handleMouseLeave}
-                    onMouseMove={handleMouseMove}
-                    onFocus={handleFocus}
-                    onBlur={handleBlur}
-                    className="liquid-glass pointer-events-auto select-none text-white"
-                >
-                    <motion.div
+        <>
+            {/* ── Mobile: classic burger ── */}
+            <div className="pointer-events-none fixed inset-x-0 top-0 z-50 md:hidden">
+                <div className="pointer-events-auto absolute right-4 top-4">
+                    <button
+                        type="button"
+                        onClick={() => setMobileOpen((v) => !v)}
+                        aria-label={mobileOpen ? "Close menu" : "Open menu"}
+                        aria-expanded={mobileOpen}
+                        className="liquid-glass flex h-12 w-12 items-center justify-center rounded-xl text-white"
+                    >
+                        {mobileOpen ? (
+                            <FiX className="text-xl" aria-hidden />
+                        ) : (
+                            <FiMenu className="text-xl" aria-hidden />
+                        )}
+                    </button>
+                </div>
+
+                <AnimatePresence>
+                    {mobileOpen && (
+                        <motion.div
+                            key="mobile-nav-overlay"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: reduceMotion ? 0 : 0.25 }}
+                            className="pointer-events-auto fixed inset-0 flex items-center justify-center bg-black/50 p-6 backdrop-blur-xl"
+                        >
+                            <motion.div
+                                ref={mobileMenuRef}
+                                initial={{ opacity: 0, y: 16, scale: 0.96 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 12, scale: 0.97 }}
+                                transition={{ duration: reduceMotion ? 0 : 0.28 }}
+                                className="liquid-glass relative w-full max-w-sm overflow-hidden rounded-3xl p-8"
+                            >
+                                <button
+                                    type="button"
+                                    onClick={() => setMobileOpen(false)}
+                                    className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+                                    aria-label="Close menu"
+                                >
+                                    <FiX className="text-xl" />
+                                </button>
+
+                                <ul className="mt-6 flex flex-col items-stretch gap-2">
+                                    {NAV_ITEMS.map((item) => {
+                                        const Icon = item.icon
+                                        const isActive = onHome && item.id === active
+                                        return (
+                                            <li key={item.id}>
+                                                <Link
+                                                    href={hrefFor(item, onHome)}
+                                                    prefetch={!item.path.startsWith("#")}
+                                                    onClick={(e) => handleMobileClick(e, item)}
+                                                    aria-current={isActive ? "location" : undefined}
+                                                    className={`flex items-center gap-3 rounded-2xl px-4 py-3.5 text-lg font-medium transition ${
+                                                        isActive
+                                                            ? "bg-white/15 text-white"
+                                                            : "text-white/75 hover:bg-white/10 hover:text-white"
+                                                    }`}
+                                                >
+                                                    <Icon className="text-xl opacity-80" aria-hidden />
+                                                    {item.title}
+                                                </Link>
+                                            </li>
+                                        )
+                                    })}
+                                </ul>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+
+            {/* ── Desktop: liquid-glass island ── */}
+            <div className="pointer-events-none fixed inset-x-0 top-0 z-50 hidden justify-center px-3 pt-6 md:flex">
+                <LayoutGroup>
+                    <motion.nav
+                        ref={navRef}
                         layout
+                        aria-label="Primary"
                         transition={island(islandSpring)}
                         style={{ borderRadius: RADIUS }}
-                        className="relative overflow-hidden"
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
+                        onMouseMove={handleMouseMove}
+                        onFocus={handleFocus}
+                        onBlur={handleBlur}
+                        className="liquid-glass pointer-events-auto select-none text-white"
                     >
-                        <motion.ul
+                        <motion.div
                             layout
                             transition={island(islandSpring)}
-                            className="relative flex items-center gap-3 p-2"
+                            style={{ borderRadius: RADIUS }}
+                            className="relative overflow-hidden"
                         >
-                            {/* Hover lens glides between icons; icons themselves never move */}
+                            <motion.ul
+                                layout
+                                transition={island(islandSpring)}
+                                className="relative flex items-center gap-3 p-2"
+                            >
+                                <AnimatePresence>
+                                    {slot && expanded && (
+                                        <motion.span
+                                            key="hover-lens"
+                                            aria-hidden
+                                            initial={{ opacity: 0, scale: 0.7, x: slot.x, width: slot.width }}
+                                            animate={{ opacity: 1, scale: 1, x: slot.x, width: slot.width }}
+                                            exit={{ opacity: 0, scale: 0.7 }}
+                                            transition={island(glideSpring)}
+                                            className="liquid-drop pointer-events-none absolute left-0 top-2 h-11 rounded-full"
+                                        />
+                                    )}
+                                </AnimatePresence>
+
+                                <AnimatePresence initial={false} mode="popLayout">
+                                    {visibleItems.map((item) => {
+                                        const Icon = item.icon
+                                        const isHovered = slot?.id === item.id
+                                        const isSelected =
+                                            expanded && onHome && item.id === active
+                                        const lit = isSelected || isHovered || !expanded
+
+                                        return (
+                                            <motion.li
+                                                key={item.id}
+                                                layout
+                                                initial={{ opacity: 0, scale: 0.5, filter: "blur(6px)" }}
+                                                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                                                exit={{ opacity: 0, scale: 0.5, filter: "blur(6px)" }}
+                                                transition={island(islandSpring)}
+                                                whileTap={reduceMotion ? undefined : { scale: 0.86 }}
+                                                onMouseEnter={(event) =>
+                                                    pointSlot(item.id, event.currentTarget)
+                                                }
+                                                className="relative"
+                                            >
+                                                <Link
+                                                    href={hrefFor(item, onHome)}
+                                                    prefetch={!item.path.startsWith("#")}
+                                                    onClick={(event) => handleDesktopClick(event, item)}
+                                                    onFocus={(event) => {
+                                                        const li = event.currentTarget.parentElement
+                                                        if (li) pointSlot(item.id, li)
+                                                    }}
+                                                    aria-label={item.title}
+                                                    aria-current={isSelected ? "location" : undefined}
+                                                    draggable={false}
+                                                    className={`relative flex h-11 items-center justify-center rounded-full outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-white/50 ${
+                                                        expanded ? "w-11" : "gap-2.5 pl-3.5 pr-4.5"
+                                                    } ${lit ? "text-white" : "text-white/55"}`}
+                                                >
+                                                    {isSelected && (
+                                                        <motion.span
+                                                            layoutId="navbar-active"
+                                                            transition={island(islandSpring)}
+                                                            className="absolute inset-0 rounded-full bg-white/[0.13] shadow-[inset_0_1px_0.5px_rgba(255,255,255,0.45),inset_0_-1px_1px_rgba(0,0,0,0.18)]"
+                                                            aria-hidden
+                                                        />
+                                                    )}
+                                                    <motion.span
+                                                        animate={{
+                                                            scale: isHovered ? 1.18 : 1,
+                                                            y: isHovered ? -1 : 0,
+                                                        }}
+                                                        transition={island(popSpring)}
+                                                        className="relative z-10 flex"
+                                                    >
+                                                        <Icon className="text-[20px]" aria-hidden />
+                                                    </motion.span>
+                                                    {!expanded && (
+                                                        <motion.span
+                                                            initial={{ opacity: 0, y: 6, filter: "blur(4px)" }}
+                                                            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                                                            transition={island(islandSpring)}
+                                                            className="relative z-10 whitespace-nowrap text-sm font-medium"
+                                                        >
+                                                            {item.title}
+                                                        </motion.span>
+                                                    )}
+                                                </Link>
+                                            </motion.li>
+                                        )
+                                    })}
+                                </AnimatePresence>
+                            </motion.ul>
+
                             <AnimatePresence>
-                                {slot && expanded && (
+                                {!expanded && (
                                     <motion.span
-                                        key="hover-lens"
+                                        key="progress"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        style={{ scaleX: progress }}
+                                        className="pointer-events-none absolute inset-x-5 bottom-0 h-px origin-left bg-gradient-to-r from-white/0 via-white/80 to-white/90"
                                         aria-hidden
-                                        initial={{ opacity: 0, scale: 0.7, x: slot.x, width: slot.width }}
-                                        animate={{ opacity: 1, scale: 1, x: slot.x, width: slot.width }}
-                                        exit={{ opacity: 0, scale: 0.7 }}
-                                        transition={island(glideSpring)}
-                                        className="liquid-drop pointer-events-none absolute left-0 top-2 h-11 rounded-full"
                                     />
                                 )}
                             </AnimatePresence>
-
-                            <AnimatePresence initial={false} mode="popLayout">
-                                {visibleItems.map((item) => {
-                                    const Icon = item.icon
-                                    const isHovered = slot?.id === item.id
-                                    // Select current section only while the full list is open — never in island mode
-                                    const isSelected =
-                                        expanded && onHome && item.id === active
-                                    const lit = isSelected || isHovered || !expanded
-
-                                    return (
-                                        <motion.li
-                                            key={item.id}
-                                            layout
-                                            initial={{ opacity: 0, scale: 0.5, filter: "blur(6px)" }}
-                                            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                                            exit={{ opacity: 0, scale: 0.5, filter: "blur(6px)" }}
-                                            transition={island(islandSpring)}
-                                            whileTap={reduceMotion ? undefined : { scale: 0.86 }}
-                                            onMouseEnter={(event) => pointSlot(item.id, event.currentTarget)}
-                                            className="relative"
-                                        >
-                                            <Link
-                                                href={item.path.startsWith("#") && !onHome ? `/${item.path}` : item.path}
-                                                prefetch={!item.path.startsWith("#")}
-                                                onClick={(event) => handleItemClick(event, item)}
-                                                onFocus={(event) => {
-                                                    const li = event.currentTarget.parentElement
-                                                    if (li) pointSlot(item.id, li)
-                                                }}
-                                                aria-label={item.title}
-                                                aria-current={isSelected ? "location" : undefined}
-                                                draggable={false}
-                                                className={`relative flex h-11 items-center justify-center rounded-full outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-white/50 ${
-                                                    expanded ? "w-11" : "gap-2.5 pl-3.5 pr-4.5"
-                                                } ${lit ? "text-white" : "text-white/55"}`}
-                                            >
-                                                {isSelected && (
-                                                    <motion.span
-                                                        layoutId="navbar-active"
-                                                        transition={island(islandSpring)}
-                                                        className="absolute inset-0 rounded-full bg-white/[0.13] shadow-[inset_0_1px_0.5px_rgba(255,255,255,0.45),inset_0_-1px_1px_rgba(0,0,0,0.18)]"
-                                                        aria-hidden
-                                                    />
-                                                )}
-                                                <motion.span
-                                                    animate={{
-                                                        scale: isHovered ? 1.18 : 1,
-                                                        y: isHovered ? -1 : 0,
-                                                    }}
-                                                    transition={island(popSpring)}
-                                                    className="relative z-10 flex"
-                                                >
-                                                    <Icon className="text-[20px]" aria-hidden />
-                                                </motion.span>
-                                                {!expanded && (
-                                                    <motion.span
-                                                        initial={{ opacity: 0, y: 6, filter: "blur(4px)" }}
-                                                        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                                                        transition={island(islandSpring)}
-                                                        className="relative z-10 whitespace-nowrap text-sm font-medium"
-                                                    >
-                                                        {item.title}
-                                                    </motion.span>
-                                                )}
-                                            </Link>
-                                        </motion.li>
-                                    )
-                                })}
-                            </AnimatePresence>
-                        </motion.ul>
+                        </motion.div>
 
                         <AnimatePresence>
-                            {!expanded && (
-                                <motion.span
-                                    key="progress"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    style={{ scaleX: progress }}
-                                    className="pointer-events-none absolute inset-x-5 bottom-0 h-px origin-left bg-gradient-to-r from-white/0 via-white/80 to-white/90"
+                            {showTooltip && slot && slotItem && (
+                                <motion.div
+                                    key="nav-tooltip"
                                     aria-hidden
-                                />
+                                    initial={{ opacity: 0, y: -6, scale: 0.85, x: slot.x + slot.width / 2 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1, x: slot.x + slot.width / 2 }}
+                                    exit={{ opacity: 0, y: -4, scale: 0.9 }}
+                                    transition={island(glideSpring)}
+                                    className="pointer-events-none absolute left-0 top-full mt-2.5"
+                                >
+                                    <div className="-translate-x-1/2">
+                                        <motion.div
+                                            layout
+                                            transition={island(glideSpring)}
+                                            style={{ borderRadius: 14 }}
+                                            className="liquid-glass overflow-hidden px-3 py-1.5 text-xs font-medium tracking-wide text-white"
+                                        >
+                                            <AnimatePresence mode="popLayout" initial={false}>
+                                                <motion.span
+                                                    key={slotItem.id}
+                                                    initial={{ opacity: 0, y: 8, filter: "blur(3px)" }}
+                                                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                                                    exit={{ opacity: 0, y: -8, filter: "blur(3px)" }}
+                                                    transition={island(glideSpring)}
+                                                    className="block whitespace-nowrap"
+                                                >
+                                                    {slotItem.title}
+                                                </motion.span>
+                                            </AnimatePresence>
+                                        </motion.div>
+                                    </div>
+                                </motion.div>
                             )}
                         </AnimatePresence>
-                    </motion.div>
-
-                    {/* Floating label below the bar — glides to the hovered icon */}
-                    <AnimatePresence>
-                        {showTooltip && slot && slotItem && (
-                            <motion.div
-                                key="nav-tooltip"
-                                aria-hidden
-                                initial={{ opacity: 0, y: -6, scale: 0.85, x: slot.x + slot.width / 2 }}
-                                animate={{ opacity: 1, y: 0, scale: 1, x: slot.x + slot.width / 2 }}
-                                exit={{ opacity: 0, y: -4, scale: 0.9 }}
-                                transition={island(glideSpring)}
-                                className="pointer-events-none absolute left-0 top-full mt-2.5"
-                            >
-                                <div className="-translate-x-1/2">
-                                <motion.div
-                                    layout
-                                    transition={island(glideSpring)}
-                                    style={{ borderRadius: 14 }}
-                                    className="liquid-glass overflow-hidden px-3 py-1.5 text-xs font-medium tracking-wide text-white"
-                                >
-                                    <AnimatePresence mode="popLayout" initial={false}>
-                                        <motion.span
-                                            key={slotItem.id}
-                                            initial={{ opacity: 0, y: 8, filter: "blur(3px)" }}
-                                            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                                            exit={{ opacity: 0, y: -8, filter: "blur(3px)" }}
-                                            transition={island(glideSpring)}
-                                            className="block whitespace-nowrap"
-                                        >
-                                            {slotItem.title}
-                                        </motion.span>
-                                    </AnimatePresence>
-                                </motion.div>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </motion.nav>
-            </LayoutGroup>
-        </div>
+                    </motion.nav>
+                </LayoutGroup>
+            </div>
+        </>
     )
 }

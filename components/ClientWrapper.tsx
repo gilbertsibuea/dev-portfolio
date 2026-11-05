@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { BackToTop } from './BackToTop'
 import Preloader from './Preloader'
 import { PreloaderProvider } from './PreloaderContext'
 
@@ -15,6 +16,7 @@ export default function ClientWrapper({ children }: ClientWrapperProps) {
   return (
     <PreloaderProvider isComplete={isPreloaderComplete}>
       {children}
+      <BackToTop />
       {isPreloaderVisible && (
         <Preloader
           onLoadComplete={() => {
