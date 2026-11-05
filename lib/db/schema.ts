@@ -64,6 +64,7 @@ export const createBlogPostsTable = `
     body_md_id TEXT,
     cover_url TEXT,
     score INTEGER NOT NULL DEFAULT 0,
+    share_count INTEGER NOT NULL DEFAULT 0,
     published_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP

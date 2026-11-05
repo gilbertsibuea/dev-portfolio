@@ -20,6 +20,19 @@ export async function initializeDatabase() {
     await turso.execute(createBlogCommentsTable);
 
     try {
+      const blogCols = (
+        await turso.execute(`PRAGMA table_info(blog_posts)`)
+      ).rows.map((row) => row.name as string);
+      if (!blogCols.includes("share_count")) {
+        await turso.execute(
+          `ALTER TABLE blog_posts ADD COLUMN share_count INTEGER NOT NULL DEFAULT 0`
+        );
+      }
+    } catch {
+      // Silent fail for blog schema update
+    }
+
+    try {
       const columnCheckResult = await turso.execute(`PRAGMA table_info(projects)`);
       const columns = columnCheckResult.rows.map((row) => row.name as string);
 

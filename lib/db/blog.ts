@@ -28,6 +28,7 @@ type BlogPostRow = {
   body_md_id: string | null
   cover_url: string | null
   score: number
+  share_count?: number
   published_at: string | null
   created_at: string
   updated_at: string
@@ -76,6 +77,7 @@ function rowToPost(row: BlogPostRow): BlogPost {
     bodyMdId: strOrNull(row.body_md_id),
     coverUrl: strOrNull(row.cover_url),
     score: num(row.score),
+    shareCount: num(row.share_count),
     publishedAt: strOrNull(row.published_at),
     createdAt: str(row.created_at),
     updatedAt: str(row.updated_at),
@@ -96,6 +98,7 @@ function toListItem(post: BlogPost): BlogPostListItem {
     excerptId: post.excerptId,
     excerptSource: post.excerptSource,
     score: post.score,
+    shareCount: post.shareCount,
     publishedAt: post.publishedAt,
     createdAt: post.createdAt,
     updatedAt: post.updatedAt,
@@ -131,6 +134,7 @@ export function localizePost(post: BlogPost, lang: BlogLang): LocalizedPost {
       bodyMd: post.bodyMdId || post.bodyMdSource,
       coverUrl: post.coverUrl,
       score: post.score,
+      shareCount: post.shareCount,
       publishedAt: post.publishedAt,
       sourceLang: post.sourceLang,
       availableLangs:
@@ -148,6 +152,7 @@ export function localizePost(post: BlogPost, lang: BlogLang): LocalizedPost {
     bodyMd: post.bodyMdEn || post.bodyMdSource,
     coverUrl: post.coverUrl,
     score: post.score,
+    shareCount: post.shareCount,
     publishedAt: post.publishedAt,
     sourceLang: post.sourceLang,
     availableLangs:
@@ -508,4 +513,21 @@ export async function countBlogPosts(): Promise<number> {
     `SELECT COUNT(*) as count FROM blog_posts`
   )
   return num(result.rows[0]?.count)
+}
+
+export async function incrementShareCount(
+  postId: number
+): Promise<number> {
+  await turso.execute({
+    sql: `UPDATE blog_posts
+          SET share_count = COALESCE(share_count, 0) + 1,
+              updated_at = CURRENT_TIMESTAMP
+          WHERE id = ?`,
+    args: [postId],
+  })
+  const result = await turso.execute({
+    sql: `SELECT share_count FROM blog_posts WHERE id = ?`,
+    args: [postId],
+  })
+  return num(result.rows[0]?.share_count)
 }

@@ -115,3 +115,21 @@ export function looksLikeCommentSpam(body: string): boolean {
   if (URL_RE.test(body) && body.length < 40) return true
   return false
 }
+
+/** Light share-counter rate limit (~4s between counted shares per key) */
+const shareTimestamps = new Map<string, number>()
+const SHARE_INTERVAL_MS = 4_000
+
+export function checkShareRateLimit(key: string): boolean {
+  const now = Date.now()
+  const last = shareTimestamps.get(key) ?? 0
+  if (now - last < SHARE_INTERVAL_MS) return false
+  shareTimestamps.set(key, now)
+  if (shareTimestamps.size > 5000) {
+    const cutoff = now - SHARE_INTERVAL_MS * 2
+    for (const [k, t] of shareTimestamps) {
+      if (t < cutoff) shareTimestamps.delete(k)
+    }
+  }
+  return true
+}

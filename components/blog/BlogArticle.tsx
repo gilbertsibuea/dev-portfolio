@@ -8,6 +8,7 @@ import { CommentThread } from "./CommentThread"
 import { LangToggle } from "./LangToggle"
 import { MarkdownBody } from "./MarkdownBody"
 import { ReadingProgress } from "./ReadingProgress"
+import { ShareModal } from "./ShareModal"
 import { VoteControls } from "./VoteControls"
 
 type Props = {
@@ -45,11 +46,18 @@ export function BlogArticle({ post, initialLang }: Props) {
           >
             ← Blog
           </Link>
-          <LangToggle
-            lang={initialLang}
-            available={post.availableLangs}
-            onChange={switchLang}
-          />
+          <div className="flex flex-wrap items-center gap-3">
+            <LangToggle
+              lang={initialLang}
+              available={post.availableLangs}
+              onChange={switchLang}
+            />
+            <ShareModal
+              slug={post.slug}
+              title={post.title}
+              initialShareCount={post.shareCount}
+            />
+          </div>
         </div>
 
         <div className="flex gap-6 md:gap-10">

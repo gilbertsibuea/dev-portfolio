@@ -20,6 +20,7 @@ export type BlogPost = {
   bodyMdId: string | null
   coverUrl: string | null
   score: number
+  shareCount: number
   publishedAt: string | null
   createdAt: string
   updatedAt: string
@@ -39,6 +40,7 @@ export type BlogPostListItem = {
   excerptId: string | null
   excerptSource: string
   score: number
+  shareCount: number
   publishedAt: string | null
   createdAt: string
   updatedAt: string
@@ -78,6 +80,7 @@ export type LocalizedPost = {
   bodyMd: string
   coverUrl: string | null
   score: number
+  shareCount: number
   publishedAt: string | null
   sourceLang: BlogLang
   availableLangs: BlogLang[]
