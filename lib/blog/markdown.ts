@@ -90,10 +90,11 @@ export function renderBlogMarkdown(md: string): string {
   // Disallow raw HTML
   renderer.html = () => ""
 
-  marked.setOptions({
+  // Prefer real paragraphs (blank lines) over soft-breaks so spacing
+  // matches the TipTap editor. normalizeBlogMarkdown ensures blank lines.
+  return marked.parse(md || "", {
+    renderer,
     gfm: true,
-    breaks: true,
-  })
-
-  return marked.parse(md || "", { renderer }) as string
+    breaks: false,
+  }) as string
 }

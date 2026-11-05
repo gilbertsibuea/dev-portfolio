@@ -3,6 +3,7 @@
 import { useRef, useState } from "react"
 import { BLOG_CATEGORIES, type BlogCategory } from "@/lib/blog/categories"
 import { estimateReadingMinutes } from "@/lib/blog/format"
+import { normalizeBlogMarkdown } from "@/lib/blog/normalizeMarkdown"
 import type { BlogLang, BlogPost } from "@/lib/blog/types"
 import { MarkdownBody } from "@/components/blog/MarkdownBody"
 import { BlogMarkdownEditor } from "@/components/admin/BlogMarkdownEditor"
@@ -57,7 +58,9 @@ export function BlogPostForm({
   const [excerptSource, setExcerptSource] = useState(
     initial?.excerptSource ?? ""
   )
-  const [bodyMdSource, setBodyMdSource] = useState(initial?.bodyMdSource ?? "")
+  const [bodyMdSource, setBodyMdSource] = useState(
+    normalizeBlogMarkdown(initial?.bodyMdSource ?? "")
+  )
   const [coverUrl, setCoverUrl] = useState(initial?.coverUrl ?? "")
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -76,7 +79,7 @@ export function BlogPostForm({
     sourceLang,
     titleSource,
     excerptSource,
-    bodyMdSource,
+    bodyMdSource: normalizeBlogMarkdown(bodyMdSource),
     coverUrl,
   })
 

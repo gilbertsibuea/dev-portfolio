@@ -18,6 +18,7 @@ import {
   FiUnderline,
 } from "react-icons/fi"
 import { LuHeading2, LuHeading3, LuListOrdered, LuQuote } from "react-icons/lu"
+import { normalizeBlogMarkdown } from "@/lib/blog/normalizeMarkdown"
 
 type Props = {
   value: string
@@ -29,8 +30,46 @@ function getMarkdown(editor: { storage: unknown }): string {
   const storage = editor.storage as {
     markdown?: { getMarkdown?: () => string }
   }
-  return storage.markdown?.getMarkdown?.() ?? ""
+  return normalizeBlogMarkdown(storage.markdown?.getMarkdown?.() ?? "")
 }
+
+/**
+ * CommonMark treats images as inline. TipTap's default block image breaks
+ * markdown-it round-trips (headings after images become literal "## …").
+ */
+const BlogImage = Image.extend({
+  name: "image",
+  addStorage() {
+    return {
+      markdown: {
+        serialize(
+          state: { write: (s: string) => void },
+          node: {
+            attrs: {
+              src?: string | null
+              alt?: string | null
+              title?: string | null
+            }
+          }
+        ) {
+          const src = String(node.attrs.src || "").replace(/[()]/g, "\\$&")
+          const alt = String(node.attrs.alt || "")
+          const title = node.attrs.title
+            ? ` "${String(node.attrs.title).replace(/"/g, '\\"')}"`
+            : ""
+          state.write(`![${alt}](${src}${title})`)
+        },
+        parse: {
+          // markdown-it image token (inline) — handled by markdown-it
+        },
+      },
+    }
+  },
+}).configure({
+  inline: true,
+  allowBase64: false,
+  HTMLAttributes: { class: "blog-editor-image" },
+})
 
 async function uploadBlogImage(file: File): Promise<string> {
   const body = new FormData()
@@ -78,14 +117,16 @@ function ToolbarButton({
 export function BlogMarkdownEditor({ value, onChange, disabled }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
   const uploading = useRef(false)
-  // Avoid feedback loops when syncing external value
-  const lastEmitted = useRef(value)
+  const lastEmitted = useRef(normalizeBlogMarkdown(value))
 
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: { levels: [2, 3, 4] },
+        code: {
+          HTMLAttributes: { class: "blog-inline-code" },
+        },
         codeBlock: { HTMLAttributes: { class: "blog-code-block" } },
       }),
       Underline,
@@ -93,20 +134,20 @@ export function BlogMarkdownEditor({ value, onChange, disabled }: Props) {
         openOnClick: false,
         HTMLAttributes: { rel: "noopener noreferrer", target: "_blank" },
       }),
-      Image.configure({
-        allowBase64: false,
-        HTMLAttributes: { class: "blog-editor-image" },
-      }),
+      BlogImage,
       Placeholder.configure({
-        placeholder: "Write your post… Use the toolbar for headings, lists, links, and images.",
+        placeholder:
+          "Write your post… Use the toolbar for headings, lists, links, and images.",
       }),
       Markdown.configure({
         html: false,
         transformPastedText: true,
         transformCopiedText: true,
+        breaks: false,
+        tightLists: false,
       }),
     ],
-    content: value || "",
+    content: normalizeBlogMarkdown(value || ""),
     editable: !disabled,
     editorProps: {
       attributes: {
@@ -127,9 +168,12 @@ export function BlogMarkdownEditor({ value, onChange, disabled }: Props) {
               top: event.clientY,
             })
             if (!coordinates || !schema.nodes.image) return
-            const node = schema.nodes.image.create({ src: url })
-            const tx = view.state.tr.insert(coordinates.pos, node)
-            view.dispatch(tx)
+            const image = schema.nodes.image.create({ src: url })
+            const paragraph = schema.nodes.paragraph.create()
+            const tr = view.state.tr
+              .insert(coordinates.pos, image)
+              .insert(coordinates.pos + image.nodeSize, paragraph)
+            view.dispatch(tr)
           } catch (err) {
             console.error(err)
             alert(err instanceof Error ? err.message : "Image upload failed")
@@ -144,7 +188,12 @@ export function BlogMarkdownEditor({ value, onChange, disabled }: Props) {
         void (async () => {
           try {
             const url = await uploadBlogImage(file)
-            editor?.chain().focus().setImage({ src: url }).run()
+            editor
+              ?.chain()
+              .focus()
+              .setImage({ src: url })
+              .insertContent({ type: "paragraph" })
+              .run()
           } catch (err) {
             console.error(err)
             alert(err instanceof Error ? err.message : "Image upload failed")
@@ -167,29 +216,37 @@ export function BlogMarkdownEditor({ value, onChange, disabled }: Props) {
 
   useEffect(() => {
     if (!editor) return
-    if (value === lastEmitted.current) return
-    // External reset (e.g. loaded post) — replace content without fighting typing
+    const next = normalizeBlogMarkdown(value || "")
+    if (next === lastEmitted.current) return
     const current = getMarkdown(editor)
-    if (current === value) {
-      lastEmitted.current = value
+    if (current === next) {
+      lastEmitted.current = next
       return
     }
-    editor.commands.setContent(value || "")
-    lastEmitted.current = value
+    editor.commands.setContent(next)
+    lastEmitted.current = next
   }, [editor, value])
 
-  const insertImage = useCallback(async (file: File) => {
-    if (!editor || uploading.current) return
-    uploading.current = true
-    try {
-      const url = await uploadBlogImage(file)
-      editor.chain().focus().setImage({ src: url }).run()
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Image upload failed")
-    } finally {
-      uploading.current = false
-    }
-  }, [editor])
+  const insertImage = useCallback(
+    async (file: File) => {
+      if (!editor || uploading.current) return
+      uploading.current = true
+      try {
+        const url = await uploadBlogImage(file)
+        editor
+          .chain()
+          .focus()
+          .setImage({ src: url })
+          .insertContent({ type: "paragraph" })
+          .run()
+      } catch (err) {
+        alert(err instanceof Error ? err.message : "Image upload failed")
+      } finally {
+        uploading.current = false
+      }
+    },
+    [editor]
+  )
 
   const setLink = () => {
     if (!editor) return
@@ -200,7 +257,22 @@ export function BlogMarkdownEditor({ value, onChange, disabled }: Props) {
       editor.chain().focus().extendMarkRange("link").unsetLink().run()
       return
     }
-    editor.chain().focus().extendMarkRange("link").setLink({ href: url.trim() }).run()
+    editor
+      .chain()
+      .focus()
+      .extendMarkRange("link")
+      .setLink({ href: url.trim() })
+      .run()
+  }
+
+  const toggleInlineCode = () => {
+    if (!editor) return
+    if (editor.isActive("code")) {
+      editor.chain().focus().unsetCode().run()
+      return
+    }
+    // Code excludes other marks — clear them first so the toggle sticks
+    editor.chain().focus().unsetAllMarks().setCode().run()
   }
 
   if (!editor) {
@@ -242,7 +314,7 @@ export function BlogMarkdownEditor({ value, onChange, disabled }: Props) {
           label="Inline code"
           active={editor.isActive("code")}
           disabled={disabled}
-          onClick={() => editor.chain().focus().toggleCode().run()}
+          onClick={toggleInlineCode}
         >
           <FiCode />
         </ToolbarButton>
@@ -253,7 +325,9 @@ export function BlogMarkdownEditor({ value, onChange, disabled }: Props) {
           label="Heading 2"
           active={editor.isActive("heading", { level: 2 })}
           disabled={disabled}
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 2 }).run()
+          }
         >
           <LuHeading2 />
         </ToolbarButton>
@@ -261,7 +335,9 @@ export function BlogMarkdownEditor({ value, onChange, disabled }: Props) {
           label="Heading 3"
           active={editor.isActive("heading", { level: 3 })}
           disabled={disabled}
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 3 }).run()
+          }
         >
           <LuHeading3 />
         </ToolbarButton>
@@ -292,7 +368,12 @@ export function BlogMarkdownEditor({ value, onChange, disabled }: Props) {
 
         <span className="mx-1 h-5 w-px bg-gray-700" />
 
-        <ToolbarButton label="Link" active={editor.isActive("link")} disabled={disabled} onClick={setLink}>
+        <ToolbarButton
+          label="Link"
+          active={editor.isActive("link")}
+          disabled={disabled}
+          onClick={setLink}
+        >
           <FiLink />
         </ToolbarButton>
         <ToolbarButton
@@ -318,8 +399,11 @@ export function BlogMarkdownEditor({ value, onChange, disabled }: Props) {
       <EditorContent editor={editor} />
 
       <style jsx global>{`
+        .blog-md-editor > * + * {
+          margin-top: 0.85em;
+        }
         .blog-md-editor p {
-          margin: 0.65em 0;
+          margin: 0;
         }
         .blog-md-editor h2 {
           margin: 1.1em 0 0.4em;
@@ -350,11 +434,15 @@ export function BlogMarkdownEditor({ value, onChange, disabled }: Props) {
           font-style: italic;
           margin: 0.8em 0;
         }
-        .blog-md-editor code {
-          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-          font-size: 0.9em;
-          background: rgba(255, 255, 255, 0.08);
-          padding: 0.1em 0.35em;
+        .blog-md-editor code.blog-inline-code,
+        .blog-md-editor :not(pre) > code {
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+            monospace;
+          font-size: 0.88em;
+          color: #e9d5ff;
+          background: rgba(139, 92, 246, 0.18);
+          border: 1px solid rgba(167, 139, 250, 0.25);
+          padding: 0.15em 0.4em;
           border-radius: 4px;
         }
         .blog-md-editor pre {
@@ -367,7 +455,9 @@ export function BlogMarkdownEditor({ value, onChange, disabled }: Props) {
         }
         .blog-md-editor pre code {
           background: transparent;
+          border: none;
           padding: 0;
+          color: inherit;
         }
         .blog-md-editor a {
           color: #c4b5fd;

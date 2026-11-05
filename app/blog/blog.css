@@ -30,7 +30,7 @@
 }
 
 .blog-prose > * + * {
-  margin-top: 1.25em;
+  margin-top: 1.15em;
 }
 
 .blog-prose h1,
@@ -59,6 +59,13 @@
 
 .blog-prose p {
   margin: 0;
+}
+
+/* Soft line-breaks still get readable breathing room */
+.blog-prose br {
+  content: "";
+  display: block;
+  margin-top: 0.65em;
 }
 
 .blog-prose a {
@@ -114,17 +121,25 @@
   border-radius: 0;
 }
 
-.blog-prose code {
+.blog-prose :not(pre) > code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.9em;
-  background: rgba(255, 255, 255, 0.06);
-  padding: 0.12em 0.35em;
+  font-size: 0.88em;
+  color: #e9d5ff;
+  background: rgba(139, 92, 246, 0.18);
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  white-space: break-spaces;
 }
 
 .blog-prose pre code {
+  color: inherit;
   background: transparent;
+  border: none;
   padding: 0;
   font-size: inherit;
+  border-radius: 0;
+  white-space: inherit;
 }
 
 .blog-prose img {
