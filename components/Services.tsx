@@ -281,7 +281,7 @@ export const Services = () => {
     const StepIcon = step.Icon
 
     return (
-        <section
+        <section 
             ref={sectionRef}
             id="process"
             className="relative overflow-hidden bg-[#0f0e1a] text-white px-4 pb-16 pt-8 md:pb-24 md:pt-10"
