@@ -38,6 +38,8 @@ export const siteConfig = {
     'TypeScript Developer',
     'Freelance Full Stack Developer',
     'Portfolio Gilbert Sibuea',
+    'Gilbert Sibuea blog',
+    'gilbertsibuea.id blog',
   ],
 }
 
@@ -161,7 +163,7 @@ export const websiteStructuredData = {
   alternateName: ['gilbertsibuea.id', 'Gilbert Sibuea'],
   url: siteConfig.url,
   description: siteConfig.description,
-  inLanguage: 'en',
+  inLanguage: ['en', 'id'],
   author: {
     '@type': 'Person',
     name: siteConfig.creator,
@@ -169,5 +171,10 @@ export const websiteStructuredData = {
   publisher: {
     '@type': 'Person',
     name: siteConfig.creator,
+  },
+  hasPart: {
+    '@type': 'Blog',
+    name: 'Gilbert Sibuea Blog',
+    url: `${siteConfig.url}/blog`,
   },
 }

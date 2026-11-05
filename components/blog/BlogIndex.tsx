@@ -67,41 +67,43 @@ export function BlogIndex({ posts, category, initialLang }: Props) {
             )
             return (
               <li key={post.id}>
-                <Link
-                  href={`/blog/${post.slug}`}
-                  className="group flex gap-4 py-7 transition-colors md:gap-8"
-                >
-                  <div className="hidden w-10 shrink-0 flex-col items-center pt-1 text-white/35 md:flex">
-                    <span className="tabular-nums text-sm">{post.score}</span>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-[0.14em] text-white/35">
-                      <span>{post.category}</span>
-                      <span className="text-white/15">·</span>
-                      <time dateTime={date}>
-                        {new Date(date).toLocaleDateString(
-                          lang === "id" ? "id-ID" : "en-GB",
-                          {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          }
-                        )}
-                      </time>
-                      <span className="text-white/15">·</span>
-                      <span>{minutes} min</span>
-                      <span className="md:hidden">· {post.score}</span>
+                <article>
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    className="group flex gap-4 py-7 transition-colors md:gap-8"
+                  >
+                    <div className="hidden w-10 shrink-0 flex-col items-center pt-1 text-white/35 md:flex">
+                      <span className="tabular-nums text-sm">{post.score}</span>
                     </div>
-                    <h2 className="mt-2 font-[family-name:var(--font-blog-display)] text-2xl text-white transition-colors group-hover:text-violet-200 md:text-[1.65rem]">
-                      {title}
-                    </h2>
-                    {excerpt && (
-                      <p className="mt-2 line-clamp-2 max-w-2xl text-[15px] leading-relaxed text-white/45">
-                        {excerpt}
-                      </p>
-                    )}
-                  </div>
-                </Link>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-[0.14em] text-white/35">
+                        <span>{post.category}</span>
+                        <span className="text-white/15">·</span>
+                        <time dateTime={date}>
+                          {new Date(date).toLocaleDateString(
+                            lang === "id" ? "id-ID" : "en-GB",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            }
+                          )}
+                        </time>
+                        <span className="text-white/15">·</span>
+                        <span>{minutes} min</span>
+                        <span className="md:hidden">· {post.score}</span>
+                      </div>
+                      <h2 className="mt-2 font-[family-name:var(--font-blog-display)] text-2xl text-white transition-colors group-hover:text-violet-200 md:text-[1.65rem]">
+                        {title}
+                      </h2>
+                      {excerpt && (
+                        <p className="mt-2 line-clamp-2 max-w-2xl text-[15px] leading-relaxed text-white/45">
+                          {excerpt}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                </article>
               </li>
             )
           })}

@@ -88,6 +88,17 @@ export function BlogArticle({ post, initialLang }: Props) {
               {post.title}
             </h1>
 
+            <p className="mt-3 text-sm text-white/40">
+              By{" "}
+              <a
+                href="https://www.gilbertsibuea.id"
+                className="text-white/60 transition hover:text-violet-300"
+                rel="author"
+              >
+                Gilbert Sibuea
+              </a>
+            </p>
+
             {post.excerpt && (
               <p className="mt-5 max-w-[42rem] text-lg leading-relaxed text-white/50">
                 {post.excerpt}
@@ -98,7 +109,7 @@ export function BlogArticle({ post, initialLang }: Props) {
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={post.coverUrl}
-                alt=""
+                alt={post.title}
                 className="mt-10 w-full border-y border-white/10 object-cover"
               />
             )}

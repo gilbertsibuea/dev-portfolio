@@ -7,11 +7,17 @@ import {
   getPublishedBlogPostBySlug,
   localizePost,
 } from "@/lib/db/blog"
+import {
+  blogBreadcrumbJsonLd,
+  blogPostingJsonLd,
+  buildBlogPostMetadata,
+} from "@/lib/blog/seo"
 import { getBlogLangCookie, parseBlogLang } from "@/lib/blog/voter"
 import type { BlogLang } from "@/lib/blog/types"
 import { siteConfig } from "@/lib/metadata"
 import { BlogArticle } from "@/components/blog/BlogArticle"
 import { BlogArticleSkeleton } from "@/components/blog/BlogSkeletons"
+import { JsonLd } from "@/components/blog/JsonLd"
 
 export const dynamic = "force-dynamic"
 
@@ -38,30 +44,23 @@ async function resolveLang(
   return fallback
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: Props): Promise<Metadata> {
   const { slug } = await params
-  // Lightweight metadata first so soft navigations aren't blocked on Turso.
-  // Enrich when the post is already warm / available quickly.
+  const sp = await searchParams
   try {
+    await initializeDatabase()
     const post = await getPublishedBlogPostBySlug(slug)
     if (!post) {
-      return { title: `Blog | ${siteConfig.name}` }
+      return {
+        title: `Not found | ${siteConfig.name}`,
+        robots: { index: false, follow: false },
+      }
     }
-    const localized = localizePost(post, post.sourceLang)
-    const url = `${siteConfig.url}/blog/${post.slug}`
-    return {
-      title: `${localized.title} | ${siteConfig.name}`,
-      description: localized.excerpt || localized.title,
-      alternates: { canonical: url },
-      openGraph: {
-        title: localized.title,
-        description: localized.excerpt || localized.title,
-        url,
-        siteName: siteConfig.name,
-        type: "article",
-        publishedTime: post.publishedAt || undefined,
-      },
-    }
+    const lang = parseBlogLang(sp.lang) || post.sourceLang
+    return buildBlogPostMetadata(post, lang)
   } catch {
     return {
       title: `Blog | ${siteConfig.name}`,
@@ -84,7 +83,13 @@ async function BlogArticleContent({
   const lang = await resolveLang(langParam, post.sourceLang)
   const localized = localizePost(post, lang)
 
-  return <BlogArticle post={localized} initialLang={lang} />
+  return (
+    <>
+      <JsonLd data={blogPostingJsonLd(post, localized)} />
+      <JsonLd data={blogBreadcrumbJsonLd(localized)} />
+      <BlogArticle post={localized} initialLang={lang} />
+    </>
+  )
 }
 
 export default async function BlogArticlePage({ params, searchParams }: Props) {
@@ -92,7 +97,10 @@ export default async function BlogArticlePage({ params, searchParams }: Props) {
   const sp = await searchParams
 
   return (
-    <Suspense fallback={<BlogArticleSkeleton />} key={`${slug}:${sp.lang ?? ""}`}>
+    <Suspense
+      fallback={<BlogArticleSkeleton />}
+      key={`${slug}:${sp.lang ?? ""}`}
+    >
       <BlogArticleContent slug={slug} langParam={sp.lang} />
     </Suspense>
   )

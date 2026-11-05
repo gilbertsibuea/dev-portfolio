@@ -1,6 +1,8 @@
 import { Newsreader } from "next/font/google"
 import Link from "next/link"
+import type { Metadata } from "next"
 import type { ReactNode } from "react"
+import { siteConfig } from "@/lib/metadata"
 import "./blog.css"
 
 const newsreader = Newsreader({
@@ -10,6 +12,15 @@ const newsreader = Newsreader({
   variable: "--font-blog-display",
   display: "swap",
 })
+
+export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
+  alternates: {
+    types: {
+      "application/rss+xml": `${siteConfig.url}/blog/rss.xml`,
+    },
+  },
+}
 
 export default function BlogLayout({ children }: { children: ReactNode }) {
   return (
