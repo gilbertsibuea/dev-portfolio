@@ -50,8 +50,12 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
     
+    // Optional folder: projects (default) | blog
+    const folderRaw = String(formData.get('folder') || 'projects').toLowerCase();
+    const folder = folderRaw === 'blog' ? 'blog' : 'projects';
+
     // Create uploads directory if it doesn't exist
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'projects');
+    const uploadsDir = path.join(process.cwd(), 'public', 'uploads', folder);
     if (!existsSync(uploadsDir)) {
       await mkdir(uploadsDir, { recursive: true });
     }
@@ -67,7 +71,7 @@ export async function POST(req: NextRequest) {
     await writeFile(filePath, buffer);
     
     // Return the public URL path
-    const imageUrl = `/uploads/projects/${fileName}`;
+    const imageUrl = `/uploads/${folder}/${fileName}`;
     
     // console.log('File saved successfully:', imageUrl);
     

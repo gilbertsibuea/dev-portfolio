@@ -83,7 +83,7 @@ export default function EditBlogPostPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       <header className="border-b border-gray-800 bg-gray-900">
-        <div className="mx-auto max-w-3xl px-4 py-4">
+        <div className="mx-auto max-w-[1400px] px-4 py-4">
           <Link
             href="/admin/blog"
             className="text-sm text-gray-400 hover:text-white"
@@ -93,7 +93,7 @@ export default function EditBlogPostPage() {
           <h1 className="mt-1 text-2xl font-bold">Edit post</h1>
         </div>
       </header>
-      <main className="mx-auto max-w-3xl px-4 py-8">
+      <main className="mx-auto max-w-[1400px] px-4 py-8">
         <BlogPostForm
           key={post.id + post.updatedAt}
           initial={post}
