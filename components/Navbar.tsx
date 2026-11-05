@@ -293,8 +293,11 @@ export const Navbar = () => {
                             <AnimatePresence initial={false} mode="popLayout">
                                 {visibleItems.map((item) => {
                                     const Icon = item.icon
-                                    const isActive = onHome && item.id === active
                                     const isHovered = slot?.id === item.id
+                                    // Select current section only while the full list is open — never in island mode
+                                    const isSelected =
+                                        expanded && onHome && item.id === active
+                                    const lit = isSelected || isHovered || !expanded
 
                                     return (
                                         <motion.li
@@ -316,13 +319,13 @@ export const Navbar = () => {
                                                     if (li) pointSlot(item.id, li)
                                                 }}
                                                 aria-label={item.title}
-                                                aria-current={isActive ? "location" : undefined}
+                                                aria-current={isSelected ? "location" : undefined}
                                                 draggable={false}
                                                 className={`relative flex h-11 items-center justify-center rounded-full outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-white/50 ${
                                                     expanded ? "w-11" : "gap-2.5 pl-3.5 pr-4.5"
-                                                } ${isActive || isHovered ? "text-white" : "text-white/60"}`}
+                                                } ${lit ? "text-white" : "text-white/55"}`}
                                             >
-                                                {isActive && (
+                                                {isSelected && (
                                                     <motion.span
                                                         layoutId="navbar-active"
                                                         transition={island(islandSpring)}
