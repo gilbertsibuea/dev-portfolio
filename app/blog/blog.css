@@ -89,12 +89,36 @@
   font-style: italic;
 }
 
-.blog-prose ul,
+/* Tailwind preflight zeros list markers — restore them for articles */
+.blog-prose ul {
+  list-style-type: disc;
+  list-style-position: outside;
+  padding-left: 1.5em;
+  margin: 0.25em 0;
+}
+
 .blog-prose ol {
-  padding-left: 1.35em;
+  list-style-type: decimal;
+  list-style-position: outside;
+  padding-left: 1.5em;
+  margin: 0.25em 0;
+}
+
+.blog-prose li {
+  display: list-item;
 }
 
 .blog-prose li + li {
+  margin-top: 0.35em;
+}
+
+.blog-prose ul ul {
+  list-style-type: circle;
+  margin-top: 0.35em;
+}
+
+.blog-prose ol ol {
+  list-style-type: lower-alpha;
   margin-top: 0.35em;
 }
 
