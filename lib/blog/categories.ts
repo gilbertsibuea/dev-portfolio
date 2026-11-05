@@ -1,10 +1,10 @@
 /** Fixed blog categories — single-select, stored as exact text */
 
 export const BLOG_CATEGORIES = [
+  "Tech",
   "Life & Routines",
   "Stories & Essays",
   "Travel & Places",
-  "Tech",
   "Others",
 ] as const
 

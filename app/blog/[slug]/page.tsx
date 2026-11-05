@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 import { headers } from "next/headers"
 import { notFound } from "next/navigation"
 import { initializeDatabase } from "@/lib/db"
@@ -10,6 +11,7 @@ import { getBlogLangCookie, parseBlogLang } from "@/lib/blog/voter"
 import type { BlogLang } from "@/lib/blog/types"
 import { siteConfig } from "@/lib/metadata"
 import { BlogArticle } from "@/components/blog/BlogArticle"
+import { BlogArticleSkeleton } from "@/components/blog/BlogSkeletons"
 
 export const dynamic = "force-dynamic"
 
@@ -36,49 +38,62 @@ async function resolveLang(
   return fallback
 }
 
-export async function generateMetadata({
-  params,
-  searchParams,
-}: Props): Promise<Metadata> {
-  await initializeDatabase()
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const sp = await searchParams
-  const post = await getPublishedBlogPostBySlug(slug)
-  if (!post) return { title: "Not found" }
-
-  const lang = await resolveLang(sp.lang, post.sourceLang)
-  const localized = localizePost(post, lang)
-  const url = `${siteConfig.url}/blog/${post.slug}`
-
-  return {
-    title: `${localized.title} | ${siteConfig.name}`,
-    description: localized.excerpt || localized.title,
-    alternates: {
-      canonical: url,
-    },
-    openGraph: {
-      title: localized.title,
+  // Lightweight metadata first so soft navigations aren't blocked on Turso.
+  // Enrich when the post is already warm / available quickly.
+  try {
+    const post = await getPublishedBlogPostBySlug(slug)
+    if (!post) {
+      return { title: `Blog | ${siteConfig.name}` }
+    }
+    const localized = localizePost(post, post.sourceLang)
+    const url = `${siteConfig.url}/blog/${post.slug}`
+    return {
+      title: `${localized.title} | ${siteConfig.name}`,
       description: localized.excerpt || localized.title,
-      url,
-      siteName: siteConfig.name,
-      type: "article",
-      publishedTime: post.publishedAt || undefined,
-      images: post.coverUrl
-        ? [{ url: post.coverUrl.startsWith("http") ? post.coverUrl : `${siteConfig.url}${post.coverUrl}` }]
-        : undefined,
-    },
+      alternates: { canonical: url },
+      openGraph: {
+        title: localized.title,
+        description: localized.excerpt || localized.title,
+        url,
+        siteName: siteConfig.name,
+        type: "article",
+        publishedTime: post.publishedAt || undefined,
+      },
+    }
+  } catch {
+    return {
+      title: `Blog | ${siteConfig.name}`,
+      alternates: { canonical: `${siteConfig.url}/blog/${slug}` },
+    }
   }
 }
 
-export default async function BlogArticlePage({ params, searchParams }: Props) {
+async function BlogArticleContent({
+  slug,
+  langParam,
+}: {
+  slug: string
+  langParam?: string
+}) {
   await initializeDatabase()
-  const { slug } = await params
-  const sp = await searchParams
   const post = await getPublishedBlogPostBySlug(slug)
   if (!post) notFound()
 
-  const lang = await resolveLang(sp.lang, post.sourceLang)
+  const lang = await resolveLang(langParam, post.sourceLang)
   const localized = localizePost(post, lang)
 
   return <BlogArticle post={localized} initialLang={lang} />
+}
+
+export default async function BlogArticlePage({ params, searchParams }: Props) {
+  const { slug } = await params
+  const sp = await searchParams
+
+  return (
+    <Suspense fallback={<BlogArticleSkeleton />} key={`${slug}:${sp.lang ?? ""}`}>
+      <BlogArticleContent slug={slug} langParam={sp.lang} />
+    </Suspense>
+  )
 }

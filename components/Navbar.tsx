@@ -313,6 +313,7 @@ export const Navbar = () => {
                                         >
                                             <Link
                                                 href={item.path.startsWith("#") && !onHome ? `/${item.path}` : item.path}
+                                                prefetch={!item.path.startsWith("#")}
                                                 onClick={(event) => handleItemClick(event, item)}
                                                 onFocus={(event) => {
                                                     const li = event.currentTarget.parentElement

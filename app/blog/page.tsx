@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 import { headers } from "next/headers"
 import { initializeDatabase } from "@/lib/db"
 import { getPublishedBlogPosts } from "@/lib/db/blog"
@@ -7,6 +8,7 @@ import { getBlogLangCookie, parseBlogLang } from "@/lib/blog/voter"
 import type { BlogLang } from "@/lib/blog/types"
 import { siteConfig } from "@/lib/metadata"
 import { BlogIndex } from "@/components/blog/BlogIndex"
+import { BlogIndexSkeleton } from "@/components/blog/BlogSkeletons"
 
 export const dynamic = "force-dynamic"
 
@@ -44,24 +46,38 @@ async function resolveInitialLang(
   return "en"
 }
 
+async function BlogIndexContent({
+  categoryParam,
+  langParam,
+}: {
+  categoryParam?: string
+  langParam?: string
+}) {
+  await initializeDatabase()
+  const category = parseCategoryParam(categoryParam ?? null)
+  const [posts, initialLang] = await Promise.all([
+    getPublishedBlogPosts({ category }),
+    resolveInitialLang(langParam),
+  ])
+
+  return (
+    <BlogIndex posts={posts} category={category} initialLang={initialLang} />
+  )
+}
+
 export default async function BlogPage({
   searchParams,
 }: {
   searchParams: Promise<{ category?: string; lang?: string }>
 }) {
-  await initializeDatabase()
   const params = await searchParams
-  const category = parseCategoryParam(params.category ?? null)
-  const posts = await getPublishedBlogPosts({
-    category,
-  })
-  const initialLang = await resolveInitialLang(params.lang)
 
   return (
-    <BlogIndex
-      posts={posts}
-      category={category}
-      initialLang={initialLang}
-    />
+    <Suspense fallback={<BlogIndexSkeleton />} key={params.category ?? "all"}>
+      <BlogIndexContent
+        categoryParam={params.category}
+        langParam={params.lang}
+      />
+    </Suspense>
   )
 }

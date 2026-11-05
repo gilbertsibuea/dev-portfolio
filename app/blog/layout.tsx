@@ -20,7 +20,7 @@ export default function BlogLayout({ children }: { children: ReactNode }) {
             href="/"
             className="text-sm font-medium tracking-wide text-white/70 transition hover:text-white"
           >
-            Gilbert Sibuea
+            Home
           </Link>
           <nav className="flex items-center gap-5 text-sm">
             <Link
