@@ -44,3 +44,53 @@ export const createExperiencePanelsTable = `
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )
 `;
+
+/** Medium-style bilingual blog posts */
+export const createBlogPostsTable = `
+  CREATE TABLE IF NOT EXISTS blog_posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug TEXT NOT NULL UNIQUE,
+    status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft', 'published')),
+    category TEXT NOT NULL,
+    source_lang TEXT NOT NULL CHECK(source_lang IN ('en', 'id')),
+    title_source TEXT NOT NULL,
+    excerpt_source TEXT NOT NULL DEFAULT '',
+    body_md_source TEXT NOT NULL,
+    title_en TEXT,
+    title_id TEXT,
+    excerpt_en TEXT,
+    excerpt_id TEXT,
+    body_md_en TEXT,
+    body_md_id TEXT,
+    cover_url TEXT,
+    score INTEGER NOT NULL DEFAULT 0,
+    published_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`;
+
+export const createBlogVotesTable = `
+  CREATE TABLE IF NOT EXISTS blog_votes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,
+    voter_id TEXT NOT NULL,
+    value INTEGER NOT NULL CHECK(value IN (1, -1)),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(post_id, voter_id),
+    FOREIGN KEY (post_id) REFERENCES blog_posts(id) ON DELETE CASCADE
+  )
+`;
+
+export const createBlogCommentsTable = `
+  CREATE TABLE IF NOT EXISTS blog_comments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,
+    parent_id INTEGER,
+    author_name TEXT NOT NULL,
+    body TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'visible' CHECK(status IN ('visible', 'hidden')),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES blog_posts(id) ON DELETE CASCADE
+  )
+`;

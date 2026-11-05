@@ -1,5 +1,12 @@
 import { turso } from './turso';
-import { createProjectsTable, createAdminTable, createExperiencePanelsTable } from './schema';
+import {
+  createProjectsTable,
+  createAdminTable,
+  createExperiencePanelsTable,
+  createBlogPostsTable,
+  createBlogVotesTable,
+  createBlogCommentsTable,
+} from './schema';
 import { seedExperiencePanels } from './experience';
 import bcrypt from 'bcryptjs';
 
@@ -8,6 +15,9 @@ export async function initializeDatabase() {
     await turso.execute(createProjectsTable);
     await turso.execute(createAdminTable);
     await turso.execute(createExperiencePanelsTable);
+    await turso.execute(createBlogPostsTable);
+    await turso.execute(createBlogVotesTable);
+    await turso.execute(createBlogCommentsTable);
 
     try {
       const columnCheckResult = await turso.execute(`PRAGMA table_info(projects)`);

@@ -1,15 +1,19 @@
 "use client"
 
+import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import { FiDownload } from "react-icons/fi"
+import { FiBookOpen, FiDownload } from "react-icons/fi"
 import { FaGithub, FaInstagram, FaLinkedin } from "react-icons/fa"
 import { SiThreads } from "react-icons/si"
+import { displayTitle } from "@/lib/blog/format"
+import type { BlogPostListItem } from "@/lib/blog/types"
 
 const CV_URL = "https://canva.link/2mju5fhef5q8f39"
 const IDLE_MS = 1400
 const OPACITY_IDLE = 0.28
 const OPACITY_ACTIVE = 1
+const SEEN_BLOG_KEY = "blog_seen_slug"
 
 const SOCIALS = [
     {
@@ -43,12 +47,15 @@ const railEase = [0.25, 0.46, 0.45, 0.94] as const
 /**
  * Fixed side rails that appear after the Hero section leaves view.
  * Dim when idle; brighten on scroll or hover; enlarge on hover for easier clicks.
+ * Blog rail always shows; a short “new post” note appears only for unread titles.
  */
 export function SideRails() {
     const [visible, setVisible] = useState(false)
     const [scrolling, setScrolling] = useState(false)
     const [hoverSocial, setHoverSocial] = useState(false)
     const [hoverCv, setHoverCv] = useState(false)
+    const [newest, setNewest] = useState<BlogPostListItem | null>(null)
+    const [showNewNote, setShowNewNote] = useState(false)
     const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     useEffect(() => {
@@ -87,8 +94,39 @@ export function SideRails() {
         }
     }, [visible])
 
+    useEffect(() => {
+        let cancelled = false
+        ;(async () => {
+            try {
+                const res = await fetch("/api/blog?limit=1", { cache: "no-store" })
+                const data = await res.json()
+                if (cancelled || !data.success || !Array.isArray(data.posts)) return
+                const post = (data.posts[0] as BlogPostListItem | undefined) ?? null
+                setNewest(post)
+                if (!post) {
+                    setShowNewNote(false)
+                    return
+                }
+                const seen = localStorage.getItem(SEEN_BLOG_KEY)
+                setShowNewNote(seen !== post.slug)
+            } catch {
+                // silent
+            }
+        })()
+        return () => {
+            cancelled = true
+        }
+    }, [])
+
+    const markSeen = () => {
+        if (!newest) return
+        localStorage.setItem(SEEN_BLOG_KEY, newest.slug)
+        setShowNewNote(false)
+    }
+
     const socialActive = scrolling || hoverSocial
     const cvActive = scrolling || hoverCv
+    const newTitle = newest ? displayTitle(newest, "en") : ""
 
     return (
         <AnimatePresence>
@@ -134,7 +172,7 @@ export function SideRails() {
                         </div>
                     </motion.div>
 
-                    {/* Right — Download CV */}
+                    {/* Right — Download CV + Blog */}
                     <motion.div
                         key="side-rail-cv"
                         initial={{ opacity: 0, x: 28, y: "-50%", scale: 1 }}
@@ -142,29 +180,89 @@ export function SideRails() {
                             opacity: cvActive ? OPACITY_ACTIVE : OPACITY_IDLE,
                             x: 0,
                             y: "-50%",
-                            scale: hoverCv ? 1.14 : 1,
+                            scale: hoverCv ? 1.08 : 1,
                         }}
                         exit={{ opacity: 0, x: 24, y: "-50%", scale: 1 }}
                         transition={{ duration: 0.35, ease: railEase }}
                         style={{ transformOrigin: "right center" }}
                         className="pointer-events-auto fixed right-0 top-1/2 z-40 hidden md:block"
-                        aria-label="Download CV"
+                        aria-label="CV and blog"
                         onMouseEnter={() => setHoverCv(true)}
                         onMouseLeave={() => setHoverCv(false)}
                     >
-                        <a
-                            href={CV_URL}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group flex items-center gap-3 rounded-l-2xl border border-r-0 border-white/10 bg-[#14122a]/85 py-4 pl-3 pr-2.5 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.65)] backdrop-blur-md transition-colors hover:border-violet-400/30 hover:bg-[#1a1832]/90"
-                        >
-                            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-500/15 text-violet-200 transition-transform duration-200 group-hover:scale-125">
-                                <FiDownload className="text-xl" />
-                            </span>
-                            <span className="select-none text-[10px] font-medium uppercase tracking-[0.2em] text-white/70 [writing-mode:vertical-rl]">
-                                Download CV
-                            </span>
-                        </a>
+                        <div className="flex flex-col items-end gap-2">
+                            <a
+                                href={CV_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group flex items-center gap-3 rounded-l-2xl border border-r-0 border-white/10 bg-[#14122a]/85 py-4 pl-3 pr-2.5 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.65)] backdrop-blur-md transition-colors hover:border-violet-400/30 hover:bg-[#1a1832]/90"
+                            >
+                                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-500/15 text-violet-200 transition-transform duration-200 group-hover:scale-125">
+                                    <FiDownload className="text-xl" />
+                                </span>
+                                <span className="select-none text-[10px] font-medium uppercase tracking-[0.2em] text-white/70 [writing-mode:vertical-rl]">
+                                    Download CV
+                                </span>
+                            </a>
+
+                            {/* Blog always present */}
+                            <div className="relative flex flex-col items-end">
+                                <AnimatePresence>
+                                    {showNewNote && newest && (
+                                        <motion.div
+                                            key={newest.slug}
+                                            initial={{ opacity: 0, x: 12, y: 4 }}
+                                            animate={{ opacity: 1, x: 0, y: 0 }}
+                                            exit={{ opacity: 0, x: 8 }}
+                                            transition={{ duration: 0.3, ease: railEase }}
+                                            className="mb-2 w-[12.5rem] rounded-l-xl border border-r-0 border-violet-400/25 bg-[#1a1832]/95 px-3 py-2.5 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.65)] backdrop-blur-md"
+                                        >
+                                            <div className="flex items-start justify-between gap-2">
+                                                <p className="text-[9px] font-medium uppercase tracking-[0.16em] text-violet-300/80">
+                                                    New post
+                                                </p>
+                                                <button
+                                                    type="button"
+                                                    onClick={markSeen}
+                                                    className="text-[10px] leading-none text-white/30 hover:text-white/60"
+                                                    aria-label="Dismiss"
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+                                            <Link
+                                                href={`/blog/${newest.slug}`}
+                                                onClick={markSeen}
+                                                className="mt-1 block text-[12px] leading-snug text-white/80 transition-colors hover:text-violet-200"
+                                                title={newTitle}
+                                            >
+                                                <span className="line-clamp-2">{newTitle}</span>
+                                            </Link>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                <Link
+                                    href="/blog"
+                                    onClick={markSeen}
+                                    className="group relative flex items-center gap-3 rounded-l-2xl border border-r-0 border-white/10 bg-[#14122a]/85 py-4 pl-3 pr-2.5 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.65)] backdrop-blur-md transition-colors hover:border-violet-400/30 hover:bg-[#1a1832]/90"
+                                    aria-label="Blog"
+                                >
+                                    {showNewNote && (
+                                        <span
+                                            className="absolute left-2 top-2 h-1.5 w-1.5 rounded-full bg-violet-400"
+                                            aria-hidden
+                                        />
+                                    )}
+                                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-500/15 text-violet-200 transition-transform duration-200 group-hover:scale-110">
+                                        <FiBookOpen className="text-lg" />
+                                    </span>
+                                    <span className="select-none text-[10px] font-medium uppercase tracking-[0.2em] text-white/70 [writing-mode:vertical-rl]">
+                                        Blog
+                                    </span>
+                                </Link>
+                            </div>
+                        </div>
                     </motion.div>
                 </>
             )}

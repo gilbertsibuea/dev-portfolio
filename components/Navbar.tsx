@@ -1,6 +1,7 @@
 'use client'
 
 import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
 import React, { useState, useRef, useEffect } from "react"
 import { AiOutlineMenu, AiOutlineClose } from "react-icons/ai"
 
@@ -8,18 +9,25 @@ const navLinks = [
     { title: "Skills", path: "#stack" },
     { title: "Experience", path: "#experience" },
     { title: "Portfolio", path: "#portfolio" },
+    { title: "Blog", path: "/blog" },
     { title: "About", path: "#about" },
     { title: "Contact", path: "#contact" },
 ]
 
+function isHashPath(path: string): boolean {
+    return /^#[\w-]+$/.test(path)
+}
+
 export const Navbar = () => {
     const [nav, setNav] = useState(false)
     const menuRef = useRef<HTMLDivElement>(null)
+    const pathname = usePathname()
+    const router = useRouter()
+    const onHome = pathname === "/"
 
     const toggleNav = () => setNav(!nav)
     const closeNav = () => setNav(false)
 
-    // Close mobile menu when clicking outside
     useEffect(() => {
         if (!nav) return
         const handleClickOutside = (event: MouseEvent) => {
@@ -31,19 +39,37 @@ export const Navbar = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside)
     }, [nav])
 
-    // Only allow scrolling to valid hash links
-    const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    const handleNavClick = (
+        e: React.MouseEvent<HTMLAnchorElement>,
+        path: string
+    ) => {
+        if (!isHashPath(path)) {
+            // Real route (e.g. /blog) — let Next Link navigate
+            closeNav()
+            return
+        }
+
         e.preventDefault()
-        if (!/^#[\w-]+$/.test(path)) return // Only allow hash links like #about
-        const element = document.querySelector(path)
         closeNav()
+
+        if (!onHome) {
+            router.push(`/${path}`)
+            return
+        }
+
+        const element = document.querySelector(path)
         element?.scrollIntoView({
             behavior: "smooth",
-            block: "start"
+            block: "start",
         })
     }
 
-    return(
+    const hrefFor = (path: string) => {
+        if (!isHashPath(path)) return path
+        return onHome ? path : `/${path}`
+    }
+
+    return (
        <div className="z-50 fixed flex justify-center w-full text-white font-medium">
 
             {/* Desktop Navbar with Glassmorphism */}
@@ -56,8 +82,8 @@ export const Navbar = () => {
                     {navLinks.map((link, index) => (    
                         <li key={index}>
                              <Link 
-                                href={link.path} 
-                                onClick={(e) => handleScroll(e, link.path)}
+                                href={hrefFor(link.path)} 
+                                onClick={(e) => handleNavClick(e, link.path)}
                                 className="px-6 py-3 rounded-xl text-base 
                                          hover:bg-white/20 hover:text-white hover:shadow-[0_4px_20px_0_rgba(255,255,255,0.2)]
                                          transition-all duration-300 ease-in-out
@@ -105,8 +131,8 @@ export const Navbar = () => {
                             {navLinks.map((link, index) => (    
                                 <li key={index} className="w-full">
                                   <Link 
-                                        href={link.path} 
-                                        onClick={(e) => handleScroll(e, link.path)}
+                                        href={hrefFor(link.path)} 
+                                        onClick={(e) => handleNavClick(e, link.path)}
                                         className="text-2xl font-medium px-8 py-4 rounded-2xl
                                                  hover:bg-white/20 hover:shadow-[0_8px_30px_0_rgba(255,255,255,0.2)]
                                                  transition-all duration-300 ease-in-out
