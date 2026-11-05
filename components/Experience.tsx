@@ -203,9 +203,9 @@ function Meta({ period, location }: { period: string; location?: string }) {
 
 function FeatureCard({ job }: { job: Job }) {
     return (
-        <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1c1a36] p-5 sm:p-7">
+        <article className="relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1c1a36] p-5 sm:min-h-full sm:p-7">
             <CardStripe color={job.markColor} placement={stripeForJob(job)} />
-            <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+            <div className="relative z-10 flex flex-1 flex-col">
                 <div className="flex items-start gap-3">
                     <Mark
                         mark={job.mark}
@@ -225,12 +225,12 @@ function FeatureCard({ job }: { job: Job }) {
                 </div>
                 <Meta period={job.period} location={job.location} />
                 {job.summary && (
-                    <p className="mt-4 line-clamp-4 text-sm leading-relaxed text-white/60 sm:mt-5 sm:line-clamp-none">
+                    <p className="mt-4 text-sm leading-relaxed text-white/60 sm:mt-5">
                         {job.summary}
                     </p>
                 )}
                 {job.highlights && job.highlights.length > 0 && (
-                    <ul className="mt-auto hidden space-y-2 border-t border-white/10 pt-5 text-sm text-white/55 sm:block">
+                    <ul className="mt-4 space-y-2 border-t border-white/10 pt-4 text-sm text-white/55 sm:mt-auto sm:pt-5">
                         {job.highlights.map((line) => (
                             <li key={line} className="flex gap-2">
                                 <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-violet-400/80" />
@@ -246,7 +246,7 @@ function FeatureCard({ job }: { job: Job }) {
 
 function CompactCard({ job }: { job: Job }) {
     return (
-        <article className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1c1a36] p-4 sm:p-5">
+        <article className="relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1c1a36] p-4 sm:p-5">
             <CardStripe color={job.markColor} placement={stripeForJob(job)} />
             <div className="relative z-10">
                 <div className="flex items-start gap-3">
@@ -269,7 +269,7 @@ function CompactCard({ job }: { job: Job }) {
                 </div>
                 <Meta period={job.period} location={job.location} />
                 {job.summary && (
-                    <p className="mt-3 line-clamp-2 text-xs leading-relaxed text-white/55 sm:line-clamp-3 sm:text-[13px]">
+                    <p className="mt-3 text-xs leading-relaxed text-white/55 sm:text-[13px]">
                         {job.summary}
                     </p>
                 )}
@@ -281,7 +281,7 @@ function CompactCard({ job }: { job: Job }) {
 function PanelView({ panel }: { panel: Panel }) {
     if (panel.kind === "feature") return <FeatureCard job={panel.job} />
     return (
-        <div className="flex h-full flex-col gap-2.5 sm:gap-3">
+        <div className="flex flex-col gap-2.5 sm:h-full sm:gap-3">
             {panel.jobs.map((job) => (
                 <CompactCard key={`${job.org}-${job.role}-${job.period}`} job={job} />
             ))}
@@ -518,10 +518,10 @@ export const Experience = () => {
                 <div className="relative z-10 w-full">
                     <div
                         ref={scrollerRef}
-                        className="flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto scroll-smooth pr-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-5 sm:pr-[max(1rem,calc((100vw-26rem)/2))] [&::-webkit-scrollbar]:hidden"
+                        className="flex snap-x snap-mandatory items-start gap-4 overflow-x-auto scroll-smooth pr-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:items-stretch sm:gap-5 sm:pr-[max(1rem,calc((100vw-26rem)/2))] [&::-webkit-scrollbar]:hidden"
                     >
                         {/* Slide 0 — title position unchanged + first card */}
-                        <div className="flex h-[min(52vh,420px)] shrink-0 snap-start items-center gap-8 pl-5 sm:h-[min(56vh,480px)] sm:gap-16 sm:pl-10 md:gap-20 md:pl-14">
+                        <div className="flex shrink-0 snap-start items-center gap-8 pl-5 sm:h-[min(56vh,480px)] sm:gap-16 sm:pl-10 md:gap-20 md:pl-14">
                             <div
                                 className={`flex w-fit shrink-0 flex-col justify-center transition-opacity duration-300 ${
                                     titleBright ? "opacity-100" : "opacity-40"
@@ -543,7 +543,7 @@ export const Experience = () => {
                             {firstPanel && (
                                 <div
                                     ref={firstCardRef}
-                                    className={`h-full w-[min(85vw,22rem)] shrink-0 transition-opacity duration-300 sm:w-[26rem] ${
+                                    className={`w-[min(88vw,22rem)] shrink-0 transition-opacity duration-300 sm:h-full sm:w-[26rem] ${
                                         card1Bright ? "opacity-100" : "opacity-55"
                                     }`}
                                 >
@@ -615,7 +615,7 @@ function PanelShell({
 }) {
     return (
         <div
-            className={`h-[min(52vh,420px)] w-[min(85vw,22rem)] shrink-0 snap-center transition-opacity duration-300 sm:h-[min(56vh,480px)] sm:w-[26rem] ${
+            className={`w-[min(88vw,22rem)] shrink-0 snap-center transition-opacity duration-300 sm:h-[min(56vh,480px)] sm:w-[26rem] ${
                 active ? "opacity-100" : "opacity-55"
             }`}
         >
