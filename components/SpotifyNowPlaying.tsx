@@ -31,9 +31,14 @@ export const SPOTIFY_VIBIN_TRACKS = [
         uri: "spotify:track:4LloVtxNZpeh7q7xdi1DQc",
     },
     {
-        title: "Touch",
-        artist: "Daft Punk",
-        uri: "spotify:track:7oaEjLP2dTJLJsITbAxTOz",
+        title: "Breathe (In the Air)",
+        artist: "Pink Floyd",
+        uri: "spotify:track:2ctvdKmETyOzPb2GiJJT53",
+    },
+    {
+        title: "Lover, You Should've Come Over",
+        artist: "Jeff Buckley",
+        uri: "spotify:track:7iSyaNhLcjwuO22QuRYHsM",
     },
 ] as const
 
