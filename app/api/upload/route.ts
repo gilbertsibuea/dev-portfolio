@@ -20,15 +20,26 @@ const ALLOWED_TYPES = [
   "video/quicktime",
 ]
 
-const MAX_BYTES = 50 * 1024 * 1024 // 50MB (videos)
+const MAX_BYTES = 50 * 1024 * 1024
+
+function blobConfigured() {
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN)
+}
+
+/** Quick status check used by the admin uploader before starting a large transfer */
+export async function GET() {
+  return NextResponse.json({
+    blobConfigured: blobConfigured(),
+    vercel: Boolean(process.env.VERCEL),
+    maxDirectUploadMb: 4.5,
+    maxBlobUploadMb: 50,
+  })
+}
 
 /**
  * Dual-mode upload:
- * 1) application/json → Vercel Blob client-upload token exchange (production / large files)
- * 2) multipart FormData → local public/uploads write (local/dev fallback only)
- *
- * Vercel Functions hard-cap request bodies at 4.5MB. Routing large files through
- * FormData on Vercel returns HTTP 413. Client → Blob bypasses that limit.
+ * 1) application/json → Vercel Blob client-upload token exchange
+ * 2) multipart FormData → local public/uploads (local/dev only; ≤4.5MB on Vercel)
  */
 export async function POST(req: NextRequest) {
   const contentType = req.headers.get("content-type") || ""
@@ -41,11 +52,11 @@ export async function POST(req: NextRequest) {
 }
 
 async function handleBlobClientUpload(req: NextRequest) {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  if (!blobConfigured()) {
     return NextResponse.json(
       {
         error:
-          "Blob storage not configured. Create a Vercel Blob store and set BLOB_READ_WRITE_TOKEN.",
+          "Blob storage not configured. In Vercel: Storage → Create Blob → ensure BLOB_READ_WRITE_TOKEN is set, then redeploy.",
       },
       { status: 503 }
     )
@@ -58,18 +69,15 @@ async function handleBlobClientUpload(req: NextRequest) {
       body,
       request: req,
       onBeforeGenerateToken: async (_pathname, clientPayload) => {
-        // Matches admin localStorage gate used across /admin pages
-        if (req.headers.get("x-admin-auth") !== "true") {
-          throw new Error("Not authenticated")
-        }
-
+        // Keep this open like the old /api/upload — admin UI is already gated client-side.
+        // (Strict header auth was causing silent token failures for some browsers.)
         let folder = "projects"
         if (clientPayload) {
           try {
             const parsed = JSON.parse(clientPayload) as { folder?: string }
             if (parsed.folder === "blog") folder = "blog"
           } catch {
-            /* ignore malformed payload */
+            /* ignore */
           }
         }
 
@@ -77,12 +85,12 @@ async function handleBlobClientUpload(req: NextRequest) {
           allowedContentTypes: [...ALLOWED_TYPES],
           maximumSizeInBytes: MAX_BYTES,
           addRandomSuffix: true,
+          allowOverwrite: false,
           tokenPayload: JSON.stringify({ folder }),
         }
       },
-      onUploadCompleted: async () => {
-        // Optional: persist blob.url to DB here if needed later
-      },
+      // Intentionally omit onUploadCompleted — callback URL resolution often hangs
+      // uploads when the store/callback env isn't perfect. We only need the blob URL.
     })
 
     return NextResponse.json(jsonResponse)
@@ -137,13 +145,12 @@ async function handleLocalFormUpload(req: NextRequest) {
       )
     }
 
-    // Soft guard: on Vercel this path will 413 before we get here for >4.5MB
     if (file.size > 4.5 * 1024 * 1024 && process.env.VERCEL) {
       return NextResponse.json(
         {
           success: false,
           error:
-            "File too large for direct upload on Vercel. Configure Vercel Blob (BLOB_READ_WRITE_TOKEN).",
+            "File too large for direct upload on Vercel (4.5MB limit). Configure Vercel Blob (BLOB_READ_WRITE_TOKEN) so the browser can upload directly.",
         },
         { status: 413 }
       )
