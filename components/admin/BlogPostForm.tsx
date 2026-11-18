@@ -8,6 +8,7 @@ import { normalizeBlogMarkdown } from "@/lib/blog/normalizeMarkdown"
 import type { BlogLang, BlogPost } from "@/lib/blog/types"
 import { MarkdownBody } from "@/components/blog/MarkdownBody"
 import { BlogMarkdownEditor } from "@/components/admin/BlogMarkdownEditor"
+import { uploadAdminFile } from "@/lib/admin-upload"
 import "@/app/blog/blog.css"
 
 export type BlogFormPayload = {
@@ -102,13 +103,8 @@ export function BlogPostForm({
     setUploadingCover(true)
     setError(null)
     try {
-      const body = new FormData()
-      body.append("file", file)
-      body.append("folder", "blog")
-      const res = await fetch("/api/upload", { method: "POST", body })
-      const data = await res.json()
-      if (!data.success) throw new Error(data.error || "Cover upload failed")
-      setCoverUrl(data.imageUrl)
+      const imageUrl = await uploadAdminFile(file, { folder: "blog" })
+      setCoverUrl(imageUrl)
     } catch (e) {
       setError(e instanceof Error ? e.message : "Cover upload failed")
     } finally {

@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { uploadAdminFile } from '@/lib/admin-upload'
 
 // Helper function to check if file is a video
 const isVideoFile = (url: string | URL | undefined | null, fileType?: string): boolean => {
@@ -228,48 +229,14 @@ export function ProjectEditClient({ id }: { id: string }) {
     setUploadProgress(0)
 
     try {
-      // Create a FormData object to send the file
-      const formData = new FormData()
-      formData.append('file', uploadedImage)
-      formData.append('projectId', id)
-
-      // Create a custom fetch with upload progress
-      const xhr = new XMLHttpRequest()
-      
-      // Set up progress tracking
-      xhr.upload.addEventListener('progress', (event) => {
-        if (event.lengthComputable) {
-          const progress = Math.round((event.loaded / event.total) * 100)
-          setUploadProgress(progress)
-        }
+      return await uploadAdminFile(uploadedImage, {
+        folder: 'projects',
+        onProgress: setUploadProgress,
       })
-
-      // Create a promise to handle the upload
-      const uploadPromise = new Promise<string>((resolve, reject) => {
-        xhr.open('POST', '/api/upload', true)
-        
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            const response = JSON.parse(xhr.responseText)
-            resolve(response.imageUrl)
-          } else {
-            reject(new Error('Upload failed'))
-          }
-        }
-        
-        xhr.onerror = () => reject(new Error('Upload failed'))
-        xhr.send(formData)
-      })
-
-      // Wait for upload to complete and get the URL
-      const imageUrl = await uploadPromise
-      
-      // Return the URL from the server
-      return imageUrl
     } catch (error) {
       console.error('Error uploading image:', error)
-      alert('Failed to upload image. Please try again.')
-      throw error // Don't silently return blob URL
+      alert(error instanceof Error ? error.message : 'Failed to upload image. Please try again.')
+      throw error
     } finally {
       setIsUploading(false)
     }
@@ -301,23 +268,13 @@ export function ProjectEditClient({ id }: { id: string }) {
     setGifUploadProgress(0)
 
     try {
-      const formData = new FormData()
-      formData.append('file', uploadedGif)
-      formData.append('projectId', id)
-
-      const response = await fetch('/api/upload', { method: 'POST', body: formData })
-      if (!response.ok) throw new Error('GIF upload failed')
-
-      const data = await response.json()
-      if (data.success) {
-        setGifUploadProgress(100)
-        return data.imageUrl
-      } else {
-        throw new Error(data.error || 'GIF upload failed')
-      }
+      return await uploadAdminFile(uploadedGif, {
+        folder: 'projects',
+        onProgress: setGifUploadProgress,
+      })
     } catch (error) {
       console.error('Error uploading GIF:', error)
-      alert('Failed to upload GIF. Please try again.')
+      alert(error instanceof Error ? error.message : 'Failed to upload GIF. Please try again.')
       throw error
     } finally {
       setIsUploadingGif(false)

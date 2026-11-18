@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { uploadAdminFile } from '@/lib/admin-upload'
 
 // Project form component to create a new project
 const NewProject = () => {
@@ -162,22 +163,13 @@ const NewProject = () => {
     setGifUploadProgress(0)
 
     try {
-      const formData = new FormData()
-      formData.append('file', uploadedGif)
-
-      const response = await fetch('/api/upload', { method: 'POST', body: formData })
-      if (!response.ok) throw new Error('GIF upload failed')
-
-      const data = await response.json()
-      if (data.success) {
-        setGifUploadProgress(100)
-        return data.imageUrl
-      } else {
-        throw new Error(data.error || 'GIF upload failed')
-      }
+      return await uploadAdminFile(uploadedGif, {
+        folder: 'projects',
+        onProgress: setGifUploadProgress,
+      })
     } catch (error) {
       console.error('Error uploading GIF:', error)
-      alert('Failed to upload GIF. Please try again.')
+      alert(error instanceof Error ? error.message : 'Failed to upload GIF. Please try again.')
       throw error
     } finally {
       setIsUploadingGif(false)
@@ -199,34 +191,17 @@ const NewProject = () => {
     setUploadProgress(0)
 
     try {
-        const formData = new FormData()
-        formData.append('file', uploadedImage)
-        
-        // Use fetch for Azure upload
-        const response = await fetch('/api/upload', {
-            method: 'POST',
-            body: formData,
-        })
-
-        if (!response.ok) {
-            throw new Error('Upload failed')
-        }
-
-        const data = await response.json()
-        
-        if (data.success) {
-            setUploadProgress(100)
-            // console.log('File uploaded to Azure:', data.imageUrl)
-            return data.imageUrl // This will be the Azure blob URL
-        } else {
-            throw new Error(data.error || 'Upload failed')
-        }
+      // Client → Vercel Blob (bypasses 4.5MB Vercel Function limit / HTTP 413)
+      return await uploadAdminFile(uploadedImage, {
+        folder: 'projects',
+        onProgress: setUploadProgress,
+      })
     } catch (error) {
-        console.error('Error uploading image:', error)
-        alert('Failed to upload image. Please try again.')
-        throw error // Don't silently return blob URL
+      console.error('Error uploading image:', error)
+      alert(error instanceof Error ? error.message : 'Failed to upload image. Please try again.')
+      throw error
     } finally {
-        setIsUploading(false)
+      setIsUploading(false)
     }
   }
 

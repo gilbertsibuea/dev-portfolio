@@ -6,6 +6,7 @@ import type {
     ExperienceJobTag,
     ExperiencePanel,
 } from "@/lib/experience-types"
+import { uploadAdminFile } from "@/lib/admin-upload"
 
 const TAGS: ExperienceJobTag[] = [
     "Full Time",
@@ -66,14 +67,8 @@ export function ExperiencePanelForm({
         setUploadingIndex(index)
         setError(null)
         try {
-            const body = new FormData()
-            body.append("file", file)
-            const res = await fetch("/api/upload", { method: "POST", body })
-            const data = await res.json()
-            if (!res.ok || !data.success || !data.imageUrl) {
-                throw new Error(data.error || "Upload failed")
-            }
-            updateJob(index, { iconUrl: data.imageUrl as string })
+            const imageUrl = await uploadAdminFile(file, { folder: "projects" })
+            updateJob(index, { iconUrl: imageUrl })
         } catch (err) {
             setError(err instanceof Error ? err.message : "Icon upload failed")
         } finally {

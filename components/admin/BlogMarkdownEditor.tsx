@@ -18,6 +18,7 @@ import {
   FiUnderline,
 } from "react-icons/fi"
 import { LuHeading2, LuHeading3, LuListOrdered, LuQuote } from "react-icons/lu"
+import { uploadAdminFile } from "@/lib/admin-upload"
 import { normalizeBlogMarkdown } from "@/lib/blog/normalizeMarkdown"
 
 type Props = {
@@ -72,15 +73,7 @@ const BlogImage = Image.extend({
 })
 
 async function uploadBlogImage(file: File): Promise<string> {
-  const body = new FormData()
-  body.append("file", file)
-  body.append("folder", "blog")
-  const res = await fetch("/api/upload", { method: "POST", body })
-  const data = await res.json()
-  if (!data.success || !data.imageUrl) {
-    throw new Error(data.error || "Upload failed")
-  }
-  return data.imageUrl as string
+  return uploadAdminFile(file, { folder: "blog" })
 }
 
 function ToolbarButton({

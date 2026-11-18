@@ -1,92 +1,180 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { handleUpload, type HandleUploadBody } from "@vercel/blob/client"
+import { existsSync } from "fs"
+import { mkdir, writeFile } from "fs/promises"
+import { NextRequest, NextResponse } from "next/server"
+import path from "path"
+import { v4 as uuidv4 } from "uuid"
 
-// Route segment config for App Router - increase body size limit for video uploads
-export const dynamic = 'force-dynamic';
-export const maxDuration = 60; // Allow up to 60 seconds for large uploads
+export const dynamic = "force-dynamic"
+export const maxDuration = 60
 
+const ALLOWED_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "video/webm",
+  "video/mp4",
+  "video/mov",
+  "video/quicktime",
+]
+
+const MAX_BYTES = 50 * 1024 * 1024 // 50MB (videos)
+
+/**
+ * Dual-mode upload:
+ * 1) application/json → Vercel Blob client-upload token exchange (production / large files)
+ * 2) multipart FormData → local public/uploads write (local/dev fallback only)
+ *
+ * Vercel Functions hard-cap request bodies at 4.5MB. Routing large files through
+ * FormData on Vercel returns HTTP 413. Client → Blob bypasses that limit.
+ */
 export async function POST(req: NextRequest) {
-  // console.log('=== UPLOAD API ROUTE CALLED ===');
+  const contentType = req.headers.get("content-type") || ""
+
+  if (contentType.includes("application/json")) {
+    return handleBlobClientUpload(req)
+  }
+
+  return handleLocalFormUpload(req)
+}
+
+async function handleBlobClientUpload(req: NextRequest) {
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return NextResponse.json(
+      {
+        error:
+          "Blob storage not configured. Create a Vercel Blob store and set BLOB_READ_WRITE_TOKEN.",
+      },
+      { status: 503 }
+    )
+  }
 
   try {
-    const formData = await req.formData();
-    const file = formData.get('file') as File;
-    
-    if (!file) {
-      return NextResponse.json({ success: false, error: 'No file provided' }, { status: 400 });
-    }
-    
-    // Check if file is an image, GIF, or video
-    const allowedTypes = [
-      'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
-      'video/webm', 'video/mp4', 'video/mov', 'video/quicktime'
-    ];
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Invalid file type. Only JPG, PNG, GIF, WebP, WebM, MP4, and MOV files are allowed.' 
-      }, { status: 400 });
-    }
-    
-    // Check file size (limit based on type: 50MB for videos, 10MB for GIFs, 5MB for images)
-    let maxSize: number;
-    if (file.type.startsWith('video/')) {
-      maxSize = 50 * 1024 * 1024; // 50MB for videos
-    } else if (file.type === 'image/gif') {
-      maxSize = 10 * 1024 * 1024; // 10MB for GIFs
-    } else {
-      maxSize = 5 * 1024 * 1024; // 5MB for images
-    }
-    
-    if (file.size > maxSize) {
-      const sizeLimit = file.type.startsWith('video/') ? '50MB' : 
-                       file.type === 'image/gif' ? '10MB' : '5MB';
-      return NextResponse.json({ 
-        success: false, 
-        error: `File size exceeds ${sizeLimit} limit` 
-      }, { status: 400 });
-    }
-    
-    // Optional folder: projects (default) | blog
-    const folderRaw = String(formData.get('folder') || 'projects').toLowerCase();
-    const folder = folderRaw === 'blog' ? 'blog' : 'projects';
+    const body = (await req.json()) as HandleUploadBody
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads', folder);
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true });
-    }
-    
-    // Generate unique filename
-    const fileExtension = file.name.split('.').pop() || 'jpg';
-    const fileName = `${uuidv4()}.${fileExtension}`;
-    const filePath = path.join(uploadsDir, fileName);
-    
-    // Convert file to buffer and save
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
-    
-    // Return the public URL path
-    const imageUrl = `/uploads/${folder}/${fileName}`;
-    
-    // console.log('File saved successfully:', imageUrl);
-    
-    return NextResponse.json({ 
-      success: true, 
-      imageUrl,
-      fileType: file.type,
-      fileName: fileName
-    });
+    const jsonResponse = await handleUpload({
+      body,
+      request: req,
+      onBeforeGenerateToken: async (_pathname, clientPayload) => {
+        // Matches admin localStorage gate used across /admin pages
+        if (req.headers.get("x-admin-auth") !== "true") {
+          throw new Error("Not authenticated")
+        }
 
+        let folder = "projects"
+        if (clientPayload) {
+          try {
+            const parsed = JSON.parse(clientPayload) as { folder?: string }
+            if (parsed.folder === "blog") folder = "blog"
+          } catch {
+            /* ignore malformed payload */
+          }
+        }
+
+        return {
+          allowedContentTypes: [...ALLOWED_TYPES],
+          maximumSizeInBytes: MAX_BYTES,
+          addRandomSuffix: true,
+          tokenPayload: JSON.stringify({ folder }),
+        }
+      },
+      onUploadCompleted: async () => {
+        // Optional: persist blob.url to DB here if needed later
+      },
+    })
+
+    return NextResponse.json(jsonResponse)
   } catch (error) {
-    console.error('Upload error:', error);
+    console.error("Blob upload token error:", error)
     return NextResponse.json(
-      { success: false, error: 'Failed to upload file' }, 
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to process upload",
+      },
+      { status: 400 }
+    )
+  }
+}
+
+async function handleLocalFormUpload(req: NextRequest) {
+  try {
+    const formData = await req.formData()
+    const file = formData.get("file") as File | null
+
+    if (!file) {
+      return NextResponse.json(
+        { success: false, error: "No file provided" },
+        { status: 400 }
+      )
+    }
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Invalid file type. Only JPG, PNG, GIF, WebP, WebM, MP4, and MOV files are allowed.",
+        },
+        { status: 400 }
+      )
+    }
+
+    let maxSize = 5 * 1024 * 1024
+    if (file.type.startsWith("video/")) maxSize = 50 * 1024 * 1024
+    else if (file.type === "image/gif") maxSize = 10 * 1024 * 1024
+
+    if (file.size > maxSize) {
+      const sizeLimit = file.type.startsWith("video/")
+        ? "50MB"
+        : file.type === "image/gif"
+          ? "10MB"
+          : "5MB"
+      return NextResponse.json(
+        { success: false, error: `File size exceeds ${sizeLimit} limit` },
+        { status: 400 }
+      )
+    }
+
+    // Soft guard: on Vercel this path will 413 before we get here for >4.5MB
+    if (file.size > 4.5 * 1024 * 1024 && process.env.VERCEL) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "File too large for direct upload on Vercel. Configure Vercel Blob (BLOB_READ_WRITE_TOKEN).",
+        },
+        { status: 413 }
+      )
+    }
+
+    const folderRaw = String(formData.get("folder") || "projects").toLowerCase()
+    const folder = folderRaw === "blog" ? "blog" : "projects"
+
+    const uploadsDir = path.join(process.cwd(), "public", "uploads", folder)
+    if (!existsSync(uploadsDir)) {
+      await mkdir(uploadsDir, { recursive: true })
+    }
+
+    const fileExtension = file.name.split(".").pop() || "jpg"
+    const fileName = `${uuidv4()}.${fileExtension}`
+    const filePath = path.join(uploadsDir, fileName)
+
+    const bytes = await file.arrayBuffer()
+    await writeFile(filePath, Buffer.from(bytes))
+
+    return NextResponse.json({
+      success: true,
+      imageUrl: `/uploads/${folder}/${fileName}`,
+      fileType: file.type,
+      fileName,
+    })
+  } catch (error) {
+    console.error("Upload error:", error)
+    return NextResponse.json(
+      { success: false, error: "Failed to upload file" },
       { status: 500 }
-    );
+    )
   }
 }
